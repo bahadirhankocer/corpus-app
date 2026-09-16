@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { useSettings, updateSettings } from '../../db/settings';
 import type { Settings } from '../../db/types';
+import { AiSection } from './AiSection';
+import { ProjectsSection } from './ProjectsSection';
 import styles from './SettingsScreen.module.css';
 
 export function SettingsScreen() {
@@ -46,6 +48,9 @@ export function SettingsScreen() {
           onChange={handleTheme}
         />
       </div>
+
+      <AiSection settings={settings} />
+      <ProjectsSection settings={settings} />
     </div>
   );
 }

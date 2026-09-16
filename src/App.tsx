@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import { kickAiQueue } from './ai/queue';
 import { BottomNav } from './app/BottomNav';
 import type { ScreenId } from './app/screens';
 import { OfflineStrip } from './components/OfflineStrip';
@@ -16,7 +17,10 @@ function App() {
   const settings = useSettings();
 
   useEffect(() => {
-    void ensureSettings();
+    void ensureSettings().then(() => kickAiQueue());
+    const onOnline = () => void kickAiQueue();
+    window.addEventListener('online', onOnline);
+    return () => window.removeEventListener('online', onOnline);
   }, []);
 
   useEffect(() => {

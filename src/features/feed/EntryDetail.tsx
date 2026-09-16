@@ -1,10 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { getAudioBlob } from '../../db/audio';
-import { deleteEntry, updateEntry, useEntry } from '../../db/entries';
-import type { Entry } from '../../db/types';
+import { retryEntry } from '../../ai/queue';
+import { CategoryChips } from '../../components/CategoryChips';
 import { SegmentedControl } from '../../components/SegmentedControl';
+import { getAudioBlob } from '../../db/audio';
+import { effectiveCategories, effectiveProjectId, effectiveTags } from '../../db/effective';
+import { deleteEntry, overrideCategories, overrideProjectId, overrideTags, updateEntry, useEntry } from '../../db/entries';
+import { useProjects } from '../../db/projects';
+import type { Category, Entry } from '../../db/types';
 import { formatDateTime } from '../../utils/format';
 import styles from './EntryDetail.module.css';
 
@@ -38,9 +42,22 @@ export function EntryDetail({ entryId, onClose }: Props) {
   const { t, i18n } = useTranslation();
   const entry = useEntry(entryId);
   const audioUrl = useAudioUrl(entry?.audioId);
+  const projects = useProjects();
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [tagsDraft, setTagsDraft] = useState<string | null>(null);
+  const [categoriesDraft, setCategoriesDraft] = useState<Category[] | null>(null);
+
+  useEffect(() => {
+    setCategoriesDraft(null);
+    setTagsDraft(null);
+  }, [entryId]);
 
   if (!entry) return null;
+
+  function handleCategoriesChange(categories: Category[]) {
+    setCategoriesDraft(categories);
+    void overrideCategories(entryId, categories);
+  }
 
   function handleField<K extends keyof Pick<Entry, 'text' | 'title' | 'context'>>(field: K, value: string) {
     void updateEntry(entryId, { [field]: value } as Pick<Entry, K>);
@@ -123,6 +140,72 @@ export function EntryDetail({ entryId, onClose }: Props) {
             <span>{entry.transcript ?? t('detail.noTranscriptYet')}</span>
           </div>
         )}
+
+        {entry.ai.status === 'error' && (
+          <div className={styles.field}>
+            <span className={styles.label}>{t('detail.aiError')}</span>
+            <span>{entry.ai.error}</span>
+            <button type="button" className={styles.backButton} onClick={() => retryEntry(entryId)}>
+              {t('detail.retry')}
+            </button>
+          </div>
+        )}
+
+        {entry.ai.summary && (
+          <div className={styles.field}>
+            <span className={styles.label}>{t('detail.aiSummary')}</span>
+            <span>{entry.ai.summary}</span>
+          </div>
+        )}
+
+        <div className={styles.field}>
+          <span className={styles.label}>{t('capture.categoriesLabel')}</span>
+          <CategoryChips
+            value={categoriesDraft ?? effectiveCategories(entry)}
+            onChange={handleCategoriesChange}
+          />
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="detail-project">
+            {t('capture.projectLabel')}
+          </label>
+          <select
+            id="detail-project"
+            className={styles.input}
+            value={effectiveProjectId(entry) ?? ''}
+            onChange={(e) => overrideProjectId(entryId, e.target.value || undefined)}
+          >
+            <option value="">{t('settings.projects.noActiveProject')}</option>
+            {projects?.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label} htmlFor="detail-tags">
+            {t('capture.tagsLabel')}
+          </label>
+          <input
+            id="detail-tags"
+            className={styles.input}
+            value={tagsDraft ?? effectiveTags(entry).join(', ')}
+            onChange={(e) => setTagsDraft(e.target.value)}
+            onBlur={(e) => {
+              overrideTags(
+                entryId,
+                e.target.value
+                  .split(',')
+                  .map((tag) => tag.trim())
+                  .filter(Boolean),
+              );
+              setTagsDraft(null);
+            }}
+          />
+        </div>
 
         <div className={styles.field}>
           <span className={styles.label}>{t('capture.importanceLabel')}</span>

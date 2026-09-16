@@ -7,7 +7,8 @@
     "save": "Save",
     "cancel": "Cancel",
     "back": "Back",
-    "delete": "Delete"
+    "delete": "Delete",
+    "edit": "Edit"
   },
   "nav": {
     "capture": "Capture",
@@ -30,7 +31,10 @@
     "importanceMid": "Mid",
     "importanceHigh": "High",
     "contextLabel": "Context",
-    "saved": "Saved · processing"
+    "saved": "Saved · processing",
+    "categoriesLabel": "Categories",
+    "projectLabel": "Project",
+    "tagsLabel": "Tags (comma separated)"
   },
   "feed": {
     "empty": "No entries yet. Start from Capture.",
@@ -48,13 +52,41 @@
   "detail": {
     "confirmDelete": "Are you sure you want to delete this entry?",
     "transcript": "Transcript",
-    "noTranscriptYet": "No transcript yet."
+    "noTranscriptYet": "No transcript yet.",
+    "aiSummary": "AI summary",
+    "aiError": "AI error",
+    "retry": "Retry"
+  },
+  "category": {
+    "theme": "Theme / concept",
+    "sound": "Sound / music",
+    "voiceover": "Voiceover line",
+    "scene": "Scene / sequence",
+    "motion": "Animation / motion"
   },
   "settings": {
     "language": "Language",
     "theme": "Theme",
     "themeSystem": "System",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "ai": {
+      "title": "AI",
+      "privacyNotice": "Privacy: content sent on Gemini's free tier may be used by Google for product development. Keep this in mind for unpublished ideas. The API key is stored only on this device and never sent anywhere else.",
+      "apiKeyLabel": "Gemini API key",
+      "apiKeyHint": "Stored only on this device.",
+      "modelLabel": "Model name",
+      "enabledLabel": "AI processing",
+      "on": "On",
+      "off": "Off"
+    },
+    "projects": {
+      "title": "Projects",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "keywordsLabel": "Keywords (comma separated)",
+      "add": "+ New project",
+      "noActiveProject": "No active project"
+    }
   }
 }

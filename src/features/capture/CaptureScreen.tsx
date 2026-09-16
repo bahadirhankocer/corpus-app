@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { kickAiQueue } from '../../ai/queue';
 import { saveAudioBlob } from '../../db/audio';
 import { createEntry } from '../../db/entries';
 import type { Entry } from '../../db/types';
@@ -104,6 +105,7 @@ export function CaptureScreen() {
     reset();
     setSavedFlash(true);
     window.setTimeout(() => setSavedFlash(false), 2000);
+    void kickAiQueue();
   }
 
   function handleCancel() {

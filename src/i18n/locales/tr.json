@@ -7,7 +7,8 @@
     "save": "Kaydet",
     "cancel": "Vazgeç",
     "back": "Geri",
-    "delete": "Sil"
+    "delete": "Sil",
+    "edit": "Düzenle"
   },
   "nav": {
     "capture": "Yakala",
@@ -30,7 +31,10 @@
     "importanceMid": "Orta",
     "importanceHigh": "Yüksek",
     "contextLabel": "Bağlam",
-    "saved": "Kaydedildi · işleniyor"
+    "saved": "Kaydedildi · işleniyor",
+    "categoriesLabel": "Kategoriler",
+    "projectLabel": "Proje",
+    "tagsLabel": "Etiketler (virgülle ayır)"
   },
   "feed": {
     "empty": "Henüz girdi yok. Yakala ekranından başla.",
@@ -48,13 +52,41 @@
   "detail": {
     "confirmDelete": "Bu girdiyi silmek istediğine emin misin?",
     "transcript": "Transkript",
-    "noTranscriptYet": "Henüz transkript yok."
+    "noTranscriptYet": "Henüz transkript yok.",
+    "aiSummary": "AI özeti",
+    "aiError": "AI hatası",
+    "retry": "Tekrar dene"
+  },
+  "category": {
+    "theme": "Tema / kavram",
+    "sound": "Ses / müzik",
+    "voiceover": "Voiceover cümlesi",
+    "scene": "Sahne / sekans",
+    "motion": "Animasyon / hareket"
   },
   "settings": {
     "language": "Dil",
     "theme": "Tema",
     "themeSystem": "Sistem",
     "themeLight": "Açık",
-    "themeDark": "Koyu"
+    "themeDark": "Koyu",
+    "ai": {
+      "title": "Yapay zeka",
+      "privacyNotice": "Gizlilik: Gemini ücretsiz katmanında gönderilen içerik Google tarafından ürün geliştirme için kullanılabilir. Yayınlanmamış fikirler için bunu göz önünde bulundur. API anahtarı yalnızca bu cihazda saklanır, hiçbir yere gönderilmez.",
+      "apiKeyLabel": "Gemini API anahtarı",
+      "apiKeyHint": "Yalnızca bu cihazda saklanır.",
+      "modelLabel": "Model adı",
+      "enabledLabel": "AI işleme",
+      "on": "Açık",
+      "off": "Kapalı"
+    },
+    "projects": {
+      "title": "Projeler",
+      "nameLabel": "Ad",
+      "descriptionLabel": "Açıklama",
+      "keywordsLabel": "Anahtar kelimeler (virgülle ayır)",
+      "add": "+ Yeni proje",
+      "noActiveProject": "Aktif proje yok"
+    }
   }
 }

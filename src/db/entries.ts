@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuid } from 'uuid';
 
 import { db } from './db';
-import type { Entry } from './types';
+import type { Category, Entry } from './types';
 
 export interface NewEntryInput {
   kind: Entry['kind'];
@@ -38,6 +38,18 @@ export async function updateEntry(
   patch: Partial<Pick<Entry, 'text' | 'title' | 'importance' | 'context'>>,
 ): Promise<void> {
   await db.entries.update(id, { ...patch, updatedAt: new Date().toISOString(), 'sync.dirty': true });
+}
+
+export async function overrideCategories(id: string, categories: Category[]): Promise<void> {
+  await db.entries.update(id, { 'overrides.categories': categories, updatedAt: new Date().toISOString(), 'sync.dirty': true });
+}
+
+export async function overrideProjectId(id: string, projectId: string | undefined): Promise<void> {
+  await db.entries.update(id, { 'overrides.projectId': projectId, updatedAt: new Date().toISOString(), 'sync.dirty': true });
+}
+
+export async function overrideTags(id: string, tags: string[]): Promise<void> {
+  await db.entries.update(id, { 'overrides.tags': tags, updatedAt: new Date().toISOString(), 'sync.dirty': true });
 }
 
 export async function deleteEntry(id: string): Promise<void> {
