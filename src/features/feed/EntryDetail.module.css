@@ -11,22 +11,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4) var(--space-4);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-4);
 }
 
 .backButton {
   background: none;
   border: none;
-  color: var(--color-text);
+  padding: 0;
+  color: var(--color-text-faint);
   font-size: 15px;
-  letter-spacing: -0.01em;
   cursor: pointer;
 }
 
 .deleteButton {
   background: none;
   border: none;
+  padding: 0;
   color: var(--color-warning);
   font-size: 13px;
   cursor: pointer;
@@ -35,7 +35,7 @@
 .body {
   flex: 1;
   overflow-y: auto;
-  padding: var(--space-5) var(--space-4);
+  padding: 0 var(--space-4) var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -60,23 +60,22 @@
 }
 
 .textarea {
-  min-height: 130px;
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  min-height: 100px;
+  border: none;
+  background: none;
+  padding: 0;
   color: var(--color-text);
   font-family: var(--font-sans);
-  font-size: 15px;
+  font-size: 17px;
+  line-height: 1.5;
   letter-spacing: -0.01em;
   resize: vertical;
 }
 
 .input {
-  padding: var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  border: none;
+  background: none;
+  padding: 0;
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 15px;
@@ -86,7 +85,6 @@
 .textarea:focus,
 .input:focus {
   outline: none;
-  border-color: var(--color-text-faint);
 }
 
 .confirm {
@@ -94,32 +92,28 @@
   flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-4);
-  border: 1px solid var(--color-warning);
   border-radius: var(--radius);
   background: var(--color-warning-muted);
 }
 
 .confirmActions {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-4);
 }
 
 .confirmDelete {
-  flex: 1;
-  padding: var(--space-2);
+  background: none;
   border: none;
-  border-radius: var(--radius-sm);
-  background: var(--color-warning);
-  color: var(--color-bg);
+  padding: 0;
+  color: var(--color-warning);
+  font-weight: 500;
   cursor: pointer;
 }
 
 .confirmCancel {
-  flex: 1;
-  padding: var(--space-2);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-sm);
   background: none;
-  color: var(--color-text);
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
   cursor: pointer;
 }

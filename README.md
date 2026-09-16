@@ -1,25 +1,25 @@
 # Corpus
 
-Kişisel, simbiyotik fikir defteri. PWA — Android telefonda yakalama, Windows'ta genel bakış ve düzenleme. Tam kapsam için [docs/spec.md](./docs/spec.md) dosyasına bakın.
+A personal, symbiotic idea notebook. PWA — capture on Android, review and edit on Windows. See [docs/spec.md](./docs/spec.md) for the full spec (in Turkish; the product's primary user is Turkish-speaking).
 
-## Geliştirme
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-Prod derlemesini yerelde offline/PWA davranışıyla test etmek için:
+To test the production build's offline/PWA behavior locally:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-## Yığın
+## Stack
 
-Vite + React + TypeScript · `vite-plugin-pwa` (offline, manifest) · Dexie (IndexedDB) · i18next (TR/EN) · `@dnd-kit` (sekans) · `cytoscape` (bağlantı haritası).
+Vite + React + TypeScript · `vite-plugin-pwa` (offline, manifest) · Dexie (IndexedDB) · i18next (TR/EN) · `@dnd-kit` (sequencing) · `cytoscape` (connection map).
 
-## Yayın
+## Deployment
 
-`main` dalına her push, GitHub Actions ile derleyip GitHub Pages'e yayınlar (bkz. `.github/workflows/deploy.yml`). Kurulum adımları için proje sahibine iletilen mesaja bakın.
+Every push to `main` builds via GitHub Actions and publishes to GitHub Pages (see `.github/workflows/deploy.yml`).

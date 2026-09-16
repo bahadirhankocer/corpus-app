@@ -20,8 +20,8 @@
     "queued": "{{count}} queued"
   },
   "capture": {
-    "writeButton": "Write",
-    "recordButton": "Record (voice)",
+    "writeButton": "Text",
+    "recordButton": "Audio",
     "textLabel": "Text",
     "stopButton": "Stop",
     "reRecordButton": "Re-record",

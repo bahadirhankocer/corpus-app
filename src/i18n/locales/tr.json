@@ -20,8 +20,8 @@
     "queued": "kuyrukta {{count}} girdi"
   },
   "capture": {
-    "writeButton": "Yaz",
-    "recordButton": "Kaydet (ses)",
+    "writeButton": "Text",
+    "recordButton": "Audio",
     "textLabel": "Metin",
     "stopButton": "Durdur",
     "reRecordButton": "Yeniden kaydet",

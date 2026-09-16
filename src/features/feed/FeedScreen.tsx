@@ -19,31 +19,23 @@ function EntryCard({ entry, onOpen, projects }: { entry: Entry; onOpen: () => vo
   const projectId = effectiveProjectId(entry);
   const project = projects?.find((p) => p.id === projectId);
 
+  const metaParts = [
+    entry.kind === 'voice' ? t('feed.kindVoice') : t('feed.kindText'),
+    categories.map((c) => CATEGORY_CODES[c]).join(' '),
+    project?.name ?? entry.context,
+    t(`feed.aiStatus.${entry.ai.status}`),
+    formatDateTime(entry.createdAt, i18n.language),
+  ].filter(Boolean);
+
   return (
     <button type="button" className={styles.card} onClick={onOpen}>
-      <div className={styles.cardTop}>
-        <span>{entry.kind === 'voice' ? t('feed.kindVoice') : t('feed.kindText')}</span>
-        <span>{formatDateTime(entry.createdAt, i18n.language)}</span>
-      </div>
       <div className={styles.preview}>{preview}</div>
-      {categories.length > 0 && (
-        <div className={styles.dots} style={{ gap: 6 }}>
-          {categories.map((c) => (
-            <span key={c} className={styles.aiBadge}>
-              {CATEGORY_CODES[c]}
-            </span>
+      <div className={styles.meta}>
+        <span>{metaParts.join(' · ')}</span>
+        <div className={styles.dots}>
+          {[1, 2, 3].map((n) => (
+            <span key={n} className={styles.dot} data-filled={n <= entry.importance} />
           ))}
-        </div>
-      )}
-      <div className={styles.cardBottom}>
-        <span className={styles.context}>{project ? project.name : entry.context ?? ''}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span className={styles.aiBadge}>{t(`feed.aiStatus.${entry.ai.status}`)}</span>
-          <div className={styles.dots}>
-            {[1, 2, 3].map((n) => (
-              <span key={n} className={styles.dot} data-filled={n <= entry.importance} />
-            ))}
-          </div>
         </div>
       </div>
     </button>

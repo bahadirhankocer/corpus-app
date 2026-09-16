@@ -1,23 +1,19 @@
 .chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .chip {
-  padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-pill);
-  background: var(--color-surface);
-  color: var(--color-text-muted);
-  font-size: 12px;
-  letter-spacing: 0.01em;
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-text-faint);
+  font-size: 15px;
   cursor: pointer;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
 .chip[data-active='true'] {
-  background: var(--color-accent);
-  color: var(--color-bg);
-  border-color: var(--color-accent);
+  color: var(--color-text);
+  font-weight: 500;
 }

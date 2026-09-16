@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { kickAiQueue } from '../../ai/queue';
+import { TextChoice } from '../../components/TextChoice';
 import { saveAudioBlob } from '../../db/audio';
 import { createEntry } from '../../db/entries';
 import type { Entry } from '../../db/types';
-import { SegmentedControl } from '../../components/SegmentedControl';
 import styles from './CaptureScreen.module.css';
 import { type RecordedAudio, useAudioRecorder } from './useAudioRecorder';
 
@@ -130,26 +130,29 @@ export function CaptureScreen() {
 
   return (
     <div className={styles.screen}>
+      <div className={styles.header}>
+        <button type="button" className={styles.cancelButton} onClick={handleCancel}>
+          {t('common.cancel')}
+        </button>
+        <button type="button" className={styles.saveButton} disabled={!canSave} onClick={handleSave}>
+          {t('common.save')}
+        </button>
+      </div>
+
       {mode === 'text' && (
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="entry-text">
-            {t('capture.textLabel')}
-          </label>
-          <textarea
-            id="entry-text"
-            className={styles.textarea}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            autoFocus
-          />
-        </div>
+        <textarea
+          className={styles.textarea}
+          placeholder={t('capture.textLabel')}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          autoFocus
+        />
       )}
 
       {mode === 'voice' && (
         <div className={styles.recordBox}>
           {recorder.state === 'recording' && (
             <>
-              <span className={styles.recordDot} />
               <span className={styles.timer}>{formatTimer(elapsed)}</span>
               <button type="button" className={styles.recordActionButton} onClick={handleStopRecording}>
                 {t('capture.stopButton')}
@@ -169,21 +172,25 @@ export function CaptureScreen() {
         </div>
       )}
 
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="entry-title">
-          {t('capture.titleLabel')}
-        </label>
+      <div className={styles.footer}>
         <input
-          id="entry-title"
-          className={styles.input}
+          className={styles.plainInput}
+          placeholder={t('capture.titleLabel')}
+          aria-label={t('capture.titleLabel')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
         />
-      </div>
 
-      <div className={styles.field}>
-        <span className={styles.label}>{t('capture.importanceLabel')}</span>
-        <SegmentedControl
+        <input
+          className={styles.plainInput}
+          placeholder={t('capture.contextLabel')}
+          aria-label={t('capture.contextLabel')}
+          value={context}
+          onChange={(e) => setContext(e.target.value)}
+        />
+
+        <TextChoice
+          prefix={t('capture.importanceLabel')}
           options={[
             { value: 1, label: t('capture.importanceLow') },
             { value: 2, label: t('capture.importanceMid') },
@@ -192,27 +199,6 @@ export function CaptureScreen() {
           value={importance}
           onChange={setImportance}
         />
-      </div>
-
-      <div className={styles.field}>
-        <label className={styles.label} htmlFor="entry-context">
-          {t('capture.contextLabel')}
-        </label>
-        <input
-          id="entry-context"
-          className={styles.input}
-          value={context}
-          onChange={(e) => setContext(e.target.value)}
-        />
-      </div>
-
-      <div className={styles.actions}>
-        <button type="button" className={styles.cancelButton} onClick={handleCancel}>
-          {t('common.cancel')}
-        </button>
-        <button type="button" className={styles.saveButton} disabled={!canSave} onClick={handleSave}>
-          {t('common.save')}
-        </button>
       </div>
 
       {savedFlash && <div className={styles.status}>{t('capture.saved')}</div>}

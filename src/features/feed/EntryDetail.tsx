@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { retryEntry } from '../../ai/queue';
 import { CategoryChips } from '../../components/CategoryChips';
-import { SegmentedControl } from '../../components/SegmentedControl';
+import { TextChoice } from '../../components/TextChoice';
 import { getAudioBlob } from '../../db/audio';
 import { effectiveCategories, effectiveProjectId, effectiveTags } from '../../db/effective';
 import { deleteEntry, overrideCategories, overrideProjectId, overrideTags, updateEntry, useEntry } from '../../db/entries';
@@ -207,18 +207,16 @@ export function EntryDetail({ entryId, onClose }: Props) {
           />
         </div>
 
-        <div className={styles.field}>
-          <span className={styles.label}>{t('capture.importanceLabel')}</span>
-          <SegmentedControl
-            options={[
-              { value: 1, label: t('capture.importanceLow') },
-              { value: 2, label: t('capture.importanceMid') },
-              { value: 3, label: t('capture.importanceHigh') },
-            ]}
-            value={entry.importance}
-            onChange={handleImportance}
-          />
-        </div>
+        <TextChoice
+          prefix={t('capture.importanceLabel')}
+          options={[
+            { value: 1, label: t('capture.importanceLow') },
+            { value: 2, label: t('capture.importanceMid') },
+            { value: 3, label: t('capture.importanceHigh') },
+          ]}
+          value={entry.importance}
+          onChange={handleImportance}
+        />
 
         <div className={styles.field}>
           <label className={styles.label} htmlFor="detail-context">
