@@ -15,6 +15,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "cytoscape": "^3.34.3",
     "dexie": "^4.4.6",
+    "dexie-react-hooks": "^4.4.0",
     "i18next": "^26.4.2",
     "i18next-browser-languagedetector": "^8.2.1",
     "react": "^19.2.8",

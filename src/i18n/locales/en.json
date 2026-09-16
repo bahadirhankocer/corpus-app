@@ -3,6 +3,58 @@
     "name": "Corpus"
   },
   "common": {
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "back": "Back",
+    "delete": "Delete"
+  },
+  "nav": {
+    "capture": "Capture",
+    "feed": "Feed",
+    "settings": "Settings"
+  },
+  "offline": {
+    "label": "offline",
+    "queued": "{{count}} queued"
+  },
+  "capture": {
+    "writeButton": "Write",
+    "recordButton": "Record (voice)",
+    "textLabel": "Text",
+    "stopButton": "Stop",
+    "reRecordButton": "Re-record",
+    "titleLabel": "Short title",
+    "importanceLabel": "Importance",
+    "importanceLow": "Low",
+    "importanceMid": "Mid",
+    "importanceHigh": "High",
+    "contextLabel": "Context",
+    "saved": "Saved · processing"
+  },
+  "feed": {
+    "empty": "No entries yet. Start from Capture.",
+    "kindVoice": "VOICE",
+    "kindText": "TEXT",
+    "voicePlaceholder": "(voice note)",
+    "aiStatus": {
+      "pending": "pending",
+      "processing": "processing",
+      "done": "done",
+      "error": "error",
+      "disabled": "disabled"
+    }
+  },
+  "detail": {
+    "confirmDelete": "Are you sure you want to delete this entry?",
+    "transcript": "Transcript",
+    "noTranscriptYet": "No transcript yet."
+  },
+  "settings": {
+    "language": "Language",
+    "theme": "Theme",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   }
 }

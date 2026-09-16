@@ -1,33 +1,47 @@
-import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react';
+
+import { BottomNav } from './app/BottomNav';
+import type { ScreenId } from './app/screens';
+import { OfflineStrip } from './components/OfflineStrip';
+import { ensureSettings, useSettings } from './db/settings';
+import { CaptureScreen } from './features/capture/CaptureScreen';
+import { EntryDetail } from './features/feed/EntryDetail';
+import { FeedScreen } from './features/feed/FeedScreen';
+import { SettingsScreen } from './features/settings/SettingsScreen';
+import i18n from './i18n';
 
 function App() {
-  const { t, i18n } = useTranslation();
+  const [screen, setScreen] = useState<ScreenId>('capture');
+  const [openEntryId, setOpenEntryId] = useState<string | null>(null);
+  const settings = useSettings();
+
+  useEffect(() => {
+    void ensureSettings();
+  }, []);
+
+  useEffect(() => {
+    if (!settings) return;
+    if (i18n.language !== settings.lang) {
+      void i18n.changeLanguage(settings.lang);
+    }
+    if (settings.theme === 'system') {
+      delete document.documentElement.dataset.theme;
+    } else {
+      document.documentElement.dataset.theme = settings.theme;
+    }
+  }, [settings]);
 
   return (
-    <main
-      style={{
-        flex: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 'var(--space-3)',
-        padding: 'var(--space-5)',
-        textAlign: 'center',
-      }}
-    >
-      <span
-        style={{
-          fontFamily: 'var(--font-mono)',
-          fontSize: 12,
-          color: 'var(--color-text-muted)',
-          letterSpacing: '0.08em',
-        }}
-      >
-        {i18n.language.toUpperCase()}
-      </span>
-      <h1 style={{ fontWeight: 500, fontSize: 22, margin: 0 }}>{t('app.name')}</h1>
-    </main>
+    <>
+      <OfflineStrip />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        {screen === 'capture' && <CaptureScreen />}
+        {screen === 'feed' && <FeedScreen onOpenEntry={setOpenEntryId} />}
+        {screen === 'settings' && <SettingsScreen />}
+      </div>
+      <BottomNav active={screen} onChange={setScreen} />
+      {openEntryId && <EntryDetail entryId={openEntryId} onClose={() => setOpenEntryId(null)} />}
+    </>
   );
 }
 
