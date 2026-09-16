@@ -1,23 +1,18 @@
 .nav {
   display: flex;
-  border-top: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-bg);
   padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
 .item {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-  padding: var(--space-4) var(--space-1) var(--space-3);
+  padding: var(--space-4) var(--space-1);
   background: none;
   border: none;
   color: var(--color-text-faint);
   font-family: var(--font-sans);
   font-weight: 400;
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: -0.01em;
   cursor: pointer;
   transition: color 0.15s ease;
@@ -26,15 +21,4 @@
 .item[data-active='true'] {
   color: var(--color-text);
   font-weight: 500;
-}
-
-.dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: transparent;
-}
-
-.item[data-active='true'] .dot {
-  background: var(--color-accent);
 }

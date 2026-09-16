@@ -20,8 +20,7 @@ export function BottomNav({ active, onChange }: Props) {
           data-active={screen === active}
           onClick={() => onChange(screen)}
         >
-          <span className={styles.dot} />
-          <span>{t(`nav.${screen}`)}</span>
+          {t(`nav.${screen}`)}
         </button>
       ))}
     </nav>
