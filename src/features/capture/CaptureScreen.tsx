@@ -113,19 +113,23 @@ export function CaptureScreen() {
     reset();
   }
 
+  if (mode === 'none') {
+    return (
+      <div className={styles.hero}>
+        <button type="button" className={styles.heroButton} onClick={() => setMode('text')}>
+          {t('capture.writeButton')}
+        </button>
+        <div className={styles.heroDivider} />
+        <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
+          {t('capture.recordButton')}
+        </button>
+        {savedFlash && <div className={styles.heroStatus}>{t('capture.saved')}</div>}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.screen}>
-      {mode === 'none' && (
-        <div className={styles.modeButtons}>
-          <button type="button" className={styles.modeButton} onClick={() => setMode('text')}>
-            {t('capture.writeButton')}
-          </button>
-          <button type="button" className={styles.modeButton} onClick={handleStartVoice}>
-            {t('capture.recordButton')}
-          </button>
-        </div>
-      )}
-
       {mode === 'text' && (
         <div className={styles.field}>
           <label className={styles.label} htmlFor="entry-text">
@@ -165,55 +169,51 @@ export function CaptureScreen() {
         </div>
       )}
 
-      {mode !== 'none' && (
-        <>
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="entry-title">
-              {t('capture.titleLabel')}
-            </label>
-            <input
-              id="entry-title"
-              className={styles.input}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="entry-title">
+          {t('capture.titleLabel')}
+        </label>
+        <input
+          id="entry-title"
+          className={styles.input}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
 
-          <div className={styles.field}>
-            <span className={styles.label}>{t('capture.importanceLabel')}</span>
-            <SegmentedControl
-              options={[
-                { value: 1, label: t('capture.importanceLow') },
-                { value: 2, label: t('capture.importanceMid') },
-                { value: 3, label: t('capture.importanceHigh') },
-              ]}
-              value={importance}
-              onChange={setImportance}
-            />
-          </div>
+      <div className={styles.field}>
+        <span className={styles.label}>{t('capture.importanceLabel')}</span>
+        <SegmentedControl
+          options={[
+            { value: 1, label: t('capture.importanceLow') },
+            { value: 2, label: t('capture.importanceMid') },
+            { value: 3, label: t('capture.importanceHigh') },
+          ]}
+          value={importance}
+          onChange={setImportance}
+        />
+      </div>
 
-          <div className={styles.field}>
-            <label className={styles.label} htmlFor="entry-context">
-              {t('capture.contextLabel')}
-            </label>
-            <input
-              id="entry-context"
-              className={styles.input}
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
-            />
-          </div>
+      <div className={styles.field}>
+        <label className={styles.label} htmlFor="entry-context">
+          {t('capture.contextLabel')}
+        </label>
+        <input
+          id="entry-context"
+          className={styles.input}
+          value={context}
+          onChange={(e) => setContext(e.target.value)}
+        />
+      </div>
 
-          <div className={styles.actions}>
-            <button type="button" className={styles.cancelButton} onClick={handleCancel}>
-              {t('common.cancel')}
-            </button>
-            <button type="button" className={styles.saveButton} disabled={!canSave} onClick={handleSave}>
-              {t('common.save')}
-            </button>
-          </div>
-        </>
-      )}
+      <div className={styles.actions}>
+        <button type="button" className={styles.cancelButton} onClick={handleCancel}>
+          {t('common.cancel')}
+        </button>
+        <button type="button" className={styles.saveButton} disabled={!canSave} onClick={handleSave}>
+          {t('common.save')}
+        </button>
+      </div>
 
       {savedFlash && <div className={styles.status}>{t('capture.saved')}</div>}
     </div>

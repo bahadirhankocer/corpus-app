@@ -15,6 +15,7 @@
 
   --font-sans:
     'Inter', -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-display: 'Jost', 'Futura', 'Century Gothic', var(--font-sans);
   --font-mono: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
 
   --space-1: 4px;

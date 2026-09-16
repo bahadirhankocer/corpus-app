@@ -10,6 +10,7 @@ import { EntryDetail } from './features/feed/EntryDetail';
 import { FeedScreen } from './features/feed/FeedScreen';
 import { SettingsScreen } from './features/settings/SettingsScreen';
 import i18n from './i18n';
+import { ensurePersistentStorage } from './utils/persistStorage';
 
 function App() {
   const [screen, setScreen] = useState<ScreenId>('capture');
@@ -17,6 +18,7 @@ function App() {
   const settings = useSettings();
 
   useEffect(() => {
+    void ensurePersistentStorage();
     void ensureSettings().then(() => kickAiQueue());
     const onOnline = () => void kickAiQueue();
     window.addEventListener('online', onOnline);
