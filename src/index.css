@@ -15,8 +15,17 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
+  font-weight: 400;
+  letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior-y: contain;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: var(--font-sans);
 }
 
 #root {

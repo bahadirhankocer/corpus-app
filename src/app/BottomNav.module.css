@@ -10,22 +10,31 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: var(--space-3) var(--space-1);
+  gap: var(--space-1);
+  padding: var(--space-4) var(--space-1) var(--space-3);
   background: none;
   border: none;
-  color: var(--color-text-muted);
+  color: var(--color-text-faint);
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-weight: 400;
+  font-size: 13px;
+  letter-spacing: -0.01em;
   cursor: pointer;
+  transition: color 0.15s ease;
 }
 
 .item[data-active='true'] {
-  color: var(--color-accent);
+  color: var(--color-text);
+  font-weight: 500;
 }
 
-.code {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.06em;
+.dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.item[data-active='true'] .dot {
+  background: var(--color-accent);
 }
