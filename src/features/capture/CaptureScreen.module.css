@@ -58,6 +58,25 @@
   color: var(--color-text-faint);
 }
 
+.followUpNudge {
+  position: absolute;
+  bottom: var(--space-5);
+  left: 0;
+  right: 0;
+  background: none;
+  border: none;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
 .header {
   display: flex;
   justify-content: space-between;

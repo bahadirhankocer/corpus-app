@@ -55,7 +55,16 @@
     "noTranscriptYet": "No transcript yet.",
     "aiSummary": "AI summary",
     "aiError": "AI error",
-    "retry": "Retry"
+    "retry": "Retry",
+    "linkedEntries": "Linked entries"
+  },
+  "followup": {
+    "nudge": "a question is waiting",
+    "scrollHint": "scroll down"
+  },
+  "resurface": {
+    "skip": "Skip",
+    "writePlaceholder": "Write on this…"
   },
   "category": {
     "theme": "Theme / concept",

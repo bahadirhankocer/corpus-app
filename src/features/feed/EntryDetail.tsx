@@ -6,7 +6,15 @@ import { CategoryChips } from '../../components/CategoryChips';
 import { TextChoice } from '../../components/TextChoice';
 import { getAudioBlob } from '../../db/audio';
 import { effectiveCategories, effectiveProjectId, effectiveTags } from '../../db/effective';
-import { deleteEntry, overrideCategories, overrideProjectId, overrideTags, updateEntry, useEntry } from '../../db/entries';
+import {
+  deleteEntry,
+  overrideCategories,
+  overrideProjectId,
+  overrideTags,
+  updateEntry,
+  useChildren,
+  useEntry,
+} from '../../db/entries';
 import { useProjects } from '../../db/projects';
 import type { Category, Entry } from '../../db/types';
 import { formatDateTime } from '../../utils/format';
@@ -15,6 +23,7 @@ import styles from './EntryDetail.module.css';
 interface Props {
   entryId: string;
   onClose: () => void;
+  onNavigate: (entryId: string) => void;
 }
 
 function useAudioUrl(audioId: string | undefined) {
@@ -38,9 +47,11 @@ function useAudioUrl(audioId: string | undefined) {
   return url;
 }
 
-export function EntryDetail({ entryId, onClose }: Props) {
+export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
   const { t, i18n } = useTranslation();
   const entry = useEntry(entryId);
+  const parent = useEntry(entry?.parentEntryId);
+  const children = useChildren(entryId);
   const audioUrl = useAudioUrl(entry?.audioId);
   const projects = useProjects();
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -86,6 +97,12 @@ export function EntryDetail({ entryId, onClose }: Props) {
         <div className={styles.meta}>
           {formatDateTime(entry.createdAt, i18n.language)} · {t(`feed.aiStatus.${entry.ai.status}`)}
         </div>
+
+        {parent && (
+          <button type="button" className={styles.threadLink} onClick={() => onNavigate(parent.id)}>
+            ← {parent.title || parent.text || parent.transcript || t('feed.voicePlaceholder')}
+          </button>
+        )}
 
         {confirmDelete && (
           <div className={styles.confirm}>
@@ -229,6 +246,22 @@ export function EntryDetail({ entryId, onClose }: Props) {
             onBlur={(e) => handleField('context', e.target.value)}
           />
         </div>
+
+        {children && children.length > 0 && (
+          <div className={styles.field}>
+            <span className={styles.label}>{t('detail.linkedEntries')}</span>
+            {children.map((child) => (
+              <button
+                key={child.id}
+                type="button"
+                className={styles.threadLink}
+                onClick={() => onNavigate(child.id)}
+              >
+                {child.title || child.text || child.transcript || t('feed.voicePlaceholder')}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

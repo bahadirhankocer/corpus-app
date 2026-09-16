@@ -55,7 +55,16 @@
     "noTranscriptYet": "Henüz transkript yok.",
     "aiSummary": "AI özeti",
     "aiError": "AI hatası",
-    "retry": "Tekrar dene"
+    "retry": "Tekrar dene",
+    "linkedEntries": "Bağlı girdiler"
+  },
+  "followup": {
+    "nudge": "bir soru seni bekliyor",
+    "scrollHint": "aşağı kaydır"
+  },
+  "resurface": {
+    "skip": "Geç",
+    "writePlaceholder": "Bunun üzerine yaz…"
   },
   "category": {
     "theme": "Tema / kavram",

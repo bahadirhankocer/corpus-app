@@ -13,6 +13,8 @@ export interface Entry {
   title?: string;
   importance: 1 | 2 | 3;
   context?: string;
+  parentEntryId?: string;
+  lastSurfacedAt?: string;
   ai: {
     status: AiStatus;
     categories: Category[];
@@ -45,6 +47,16 @@ export interface Project {
   description: string;
   keywords: string[];
   status: 'active' | 'archived';
+}
+
+export interface FollowUp {
+  id: string;
+  entryId: string;
+  question: string;
+  options: string[];
+  status: 'pending' | 'answered' | 'dismissed';
+  answerEntryId?: string;
+  createdAt: string;
 }
 
 export interface Link {
@@ -108,6 +120,7 @@ export interface Settings {
   driveConnected: boolean;
   activeProjectId?: string;
   styleGuide: string;
+  lastResurfaceAt?: string;
   audioLog: {
     nextNumber: number;
     targetMinutes: number;

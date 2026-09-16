@@ -11,6 +11,7 @@ export interface NewEntryInput {
   title?: string;
   importance: Entry['importance'];
   context?: string;
+  parentEntryId?: string;
 }
 
 export async function createEntry(input: NewEntryInput): Promise<Entry> {
@@ -25,6 +26,7 @@ export async function createEntry(input: NewEntryInput): Promise<Entry> {
     title: input.title,
     importance: input.importance,
     context: input.context,
+    parentEntryId: input.parentEntryId,
     ai: { status: 'pending', categories: [], tags: [] },
     overrides: {},
     sync: { dirty: true },
@@ -70,4 +72,32 @@ export function useEntry(id: string | undefined): Entry | undefined {
 
 export function usePendingCount(): number | undefined {
   return useLiveQuery(() => db.entries.where('ai.status').equals('pending').count(), []);
+}
+
+export function useChildren(entryId: string | undefined): Entry[] | undefined {
+  return useLiveQuery(
+    () => (entryId ? db.entries.where('parentEntryId').equals(entryId).toArray() : []),
+    [entryId],
+  );
+}
+
+export async function markSurfaced(id: string): Promise<void> {
+  await db.entries.update(id, { lastSurfacedAt: new Date().toISOString() });
+}
+
+const RESURFACE_MIN_AGE_DAYS = 3;
+
+export async function pickResurfaceCandidate(): Promise<Entry | undefined> {
+  const cutoff = Date.now() - RESURFACE_MIN_AGE_DAYS * 24 * 60 * 60 * 1000;
+  const candidates = await db.entries
+    .filter((e) => new Date(e.createdAt).getTime() < cutoff)
+    .toArray();
+  if (candidates.length === 0) return undefined;
+  candidates.sort((a, b) => {
+    const aSurfaced = a.lastSurfacedAt ? new Date(a.lastSurfacedAt).getTime() : 0;
+    const bSurfaced = b.lastSurfacedAt ? new Date(b.lastSurfacedAt).getTime() : 0;
+    return aSurfaced - bSurfaced;
+  });
+  const pool = candidates.slice(0, Math.max(5, Math.ceil(candidates.length / 3)));
+  return pool[Math.floor(Math.random() * pool.length)];
 }

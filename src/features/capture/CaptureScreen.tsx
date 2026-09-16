@@ -5,6 +5,7 @@ import { kickAiQueue } from '../../ai/queue';
 import { TextChoice } from '../../components/TextChoice';
 import { saveAudioBlob } from '../../db/audio';
 import { createEntry } from '../../db/entries';
+import { usePendingFollowUp } from '../../db/followups';
 import type { Entry } from '../../db/types';
 import styles from './CaptureScreen.module.css';
 import { type RecordedAudio, useAudioRecorder } from './useAudioRecorder';
@@ -17,7 +18,11 @@ function formatTimer(sec: number): string {
   return `${m}:${s.toString().padStart(2, '0')}`;
 }
 
-export function CaptureScreen() {
+interface Props {
+  onOpenFollowUp: () => void;
+}
+
+export function CaptureScreen({ onOpenFollowUp }: Props) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('none');
   const [text, setText] = useState('');
@@ -30,6 +35,7 @@ export function CaptureScreen() {
   const recorder = useAudioRecorder();
   const audioUrlRef = useRef<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const pendingFollowUp = usePendingFollowUp();
 
   useEffect(() => {
     if (recorder.state !== 'recording') {
@@ -122,6 +128,11 @@ export function CaptureScreen() {
         <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
           {t('capture.recordButton')}
         </button>
+        {pendingFollowUp && !savedFlash && (
+          <button type="button" className={styles.followUpNudge} onClick={onOpenFollowUp}>
+            {t('followup.nudge')}
+          </button>
+        )}
         {savedFlash && <div className={styles.heroStatus}>{t('capture.saved')}</div>}
       </div>
     );

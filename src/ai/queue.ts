@@ -1,13 +1,26 @@
 import { classifyEntry } from './classify';
+import { generateFollowUp } from './followup';
 import { GeminiRateLimitError } from './gemini';
 import { getAudioBlob } from '../db/audio';
 import { db } from '../db/db';
+import { createFollowUp, hasPendingFollowUp } from '../db/followups';
 import { ensureSettings } from '../db/settings';
+import type { Entry } from '../db/types';
 
 const MIN_BACKOFF_MS = 2000;
 const MAX_BACKOFF_MS = 60000;
 
 let running = false;
+
+async function maybeGenerateFollowUp(entry: Entry, apiKey: string, model: string): Promise<void> {
+  try {
+    if (await hasPendingFollowUp(entry.id)) return;
+    const result = await generateFollowUp(entry, apiKey, model);
+    await createFollowUp(entry.id, result.question, result.options);
+  } catch {
+    // best-effort enhancement; classification already succeeded, don't surface this failure
+  }
+}
 
 async function processOne(): Promise<'processed' | 'empty' | 'skipped'> {
   const settings = await ensureSettings();
@@ -39,6 +52,15 @@ async function processOne(): Promise<'processed' | 'empty' | 'skipped'> {
         'ai.error': undefined,
         'sync.dirty': true,
       });
+      void maybeGenerateFollowUp(
+        {
+          ...entry,
+          transcript: result.transcript || entry.transcript,
+          ai: { ...entry.ai, categories: result.categories, tags: result.tags, summary: result.summary },
+        },
+        settings.geminiApiKey,
+        settings.model,
+      );
       return 'processed';
     } catch (err) {
       if (err instanceof GeminiRateLimitError) {
