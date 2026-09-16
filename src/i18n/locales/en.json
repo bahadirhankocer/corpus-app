@@ -75,6 +75,7 @@
       "privacyNotice": "Privacy: content sent on Gemini's free tier may be used by Google for product development. Keep this in mind for unpublished ideas. The API key is stored only on this device and never sent anywhere else.",
       "apiKeyLabel": "Gemini API key",
       "apiKeyHint": "Stored only on this device.",
+      "apiKeySaved": "Saved · stored only on this device",
       "modelLabel": "Model name",
       "enabledLabel": "AI processing",
       "on": "On",

@@ -75,6 +75,7 @@
       "privacyNotice": "Gizlilik: Gemini ücretsiz katmanında gönderilen içerik Google tarafından ürün geliştirme için kullanılabilir. Yayınlanmamış fikirler için bunu göz önünde bulundur. API anahtarı yalnızca bu cihazda saklanır, hiçbir yere gönderilmez.",
       "apiKeyLabel": "Gemini API anahtarı",
       "apiKeyHint": "Yalnızca bu cihazda saklanır.",
+      "apiKeySaved": "Kayıtlı · yalnızca bu cihazda",
       "modelLabel": "Model adı",
       "enabledLabel": "AI işleme",
       "on": "Açık",

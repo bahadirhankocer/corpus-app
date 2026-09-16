@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { SegmentedControl } from '../../components/SegmentedControl';
@@ -13,6 +14,7 @@ interface Props {
 
 export function AiSection({ settings }: Props) {
   const { t } = useTranslation();
+  const [apiKeyDraft, setApiKeyDraft] = useState<string | null>(null);
 
   async function handleEnabled(value: 'on' | 'off') {
     await updateSettings({ aiEnabled: value === 'on' });
@@ -20,6 +22,7 @@ export function AiSection({ settings }: Props) {
   }
 
   async function handleApiKey(value: string) {
+    setApiKeyDraft(value);
     await updateSettings({ geminiApiKey: value.trim() || undefined });
     void kickAiQueue();
   }
@@ -40,13 +43,18 @@ export function AiSection({ settings }: Props) {
         </label>
         <input
           id="gemini-key"
-          type="password"
+          type="text"
           autoComplete="off"
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
           className={styles.input}
-          defaultValue={settings.geminiApiKey ?? ''}
-          onBlur={(e) => handleApiKey(e.target.value)}
+          value={apiKeyDraft ?? settings.geminiApiKey ?? ''}
+          onChange={(e) => handleApiKey(e.target.value)}
         />
-        <span className={styles.hint}>{t('settings.ai.apiKeyHint')}</span>
+        <span className={styles.hint}>
+          {settings.geminiApiKey ? t('settings.ai.apiKeySaved') : t('settings.ai.apiKeyHint')}
+        </span>
       </div>
 
       <div className={styles.field}>

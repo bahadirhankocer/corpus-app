@@ -119,7 +119,6 @@ export function CaptureScreen() {
         <button type="button" className={styles.heroButton} onClick={() => setMode('text')}>
           {t('capture.writeButton')}
         </button>
-        <div className={styles.heroDivider} />
         <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
           {t('capture.recordButton')}
         </button>
