@@ -15,6 +15,7 @@
     "feed": "Feed",
     "map": "Map",
     "sequence": "Sequence",
+    "digests": "Digests",
     "settings": "Settings"
   },
   "offline": {
@@ -85,7 +86,22 @@
     "addSection": "+ Add section",
     "empty": "No sequence yet. Generate an AI draft or add a section.",
     "showStyleGuide": "Show style guide",
-    "hideStyleGuide": "Hide style guide"
+    "hideStyleGuide": "Hide style guide",
+    "exportPdf": "PDF style guide",
+    "exportVoiceover": "Download voiceover draft"
+  },
+  "export": {
+    "print": "Print",
+    "sequence": "Sequence",
+    "noSequence": "No sequence yet.",
+    "acceptedLinks": "Accepted connections",
+    "openContradictions": "Open contradictions",
+    "none": "None."
+  },
+  "digests": {
+    "empty": "No digests yet. With AI processing on, one is generated automatically at the end of each day/week.",
+    "daily": "Daily",
+    "weekly": "Weekly"
   },
   "category": {
     "theme": "Theme / concept",

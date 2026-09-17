@@ -15,6 +15,7 @@
     "feed": "Akış",
     "map": "Harita",
     "sequence": "Sekans",
+    "digests": "Özetler",
     "settings": "Ayarlar"
   },
   "offline": {
@@ -85,7 +86,22 @@
     "addSection": "+ Bölüm ekle",
     "empty": "Henüz sekans yok. AI taslağı oluştur ya da bölüm ekle.",
     "showStyleGuide": "Stil özetini göster",
-    "hideStyleGuide": "Stil özetini gizle"
+    "hideStyleGuide": "Stil özetini gizle",
+    "exportPdf": "PDF stil kılavuzu",
+    "exportVoiceover": "Voiceover taslağı indir"
+  },
+  "export": {
+    "print": "Yazdır",
+    "sequence": "Sekans",
+    "noSequence": "Henüz sekans yok.",
+    "acceptedLinks": "Kabul edilmiş bağlantılar",
+    "openContradictions": "Açık çelişkiler",
+    "none": "Yok."
+  },
+  "digests": {
+    "empty": "Henüz özet yok. AI işleme açık olduğunda gün/hafta sonunda otomatik oluşur.",
+    "daily": "Günlük",
+    "weekly": "Haftalık"
   },
   "category": {
     "theme": "Tema / kavram",

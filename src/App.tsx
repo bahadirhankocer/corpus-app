@@ -9,6 +9,7 @@ import { markSurfaced, pickResurfaceCandidate } from './db/entries';
 import { ensureSettings, updateSettings, useSettings } from './db/settings';
 import type { Entry } from './db/types';
 import { CaptureScreen } from './features/capture/CaptureScreen';
+import { runDueDigests } from './features/digests/runDigests';
 import { EntryDetail } from './features/feed/EntryDetail';
 import { FeedScreen } from './features/feed/FeedScreen';
 import { FollowUpFlow } from './features/followup/FollowUpFlow';
@@ -20,6 +21,9 @@ import { ensurePersistentStorage } from './utils/persistStorage';
 const MapScreen = lazy(() => import('./features/map/MapScreen').then((m) => ({ default: m.MapScreen })));
 const SequenceScreen = lazy(() =>
   import('./features/sequence/SequenceScreen').then((m) => ({ default: m.SequenceScreen })),
+);
+const DigestsScreen = lazy(() =>
+  import('./features/digests/DigestsScreen').then((m) => ({ default: m.DigestsScreen })),
 );
 
 const RESURFACE_INTERVAL_MS = 18 * 60 * 60 * 1000;
@@ -34,6 +38,7 @@ function App() {
   useEffect(() => {
     void ensurePersistentStorage();
     void ensureSettings().then(() => kickAiQueue());
+    void runDueDigests();
     const onOnline = () => void kickAiQueue();
     window.addEventListener('online', onOnline);
     return () => window.removeEventListener('online', onOnline);
@@ -96,6 +101,14 @@ function App() {
             node: (
               <Suspense fallback={null}>
                 <SequenceScreen onOpenEntry={setOpenEntryId} />
+              </Suspense>
+            ),
+          },
+          {
+            id: 'digests',
+            node: (
+              <Suspense fallback={null}>
+                <DigestsScreen />
               </Suspense>
             ),
           },

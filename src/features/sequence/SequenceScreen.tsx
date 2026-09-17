@@ -23,6 +23,8 @@ import { useProjects } from '../../db/projects';
 import { createSequenceVersion, updateSequenceSections, useSequenceVersions } from '../../db/sequences';
 import { useSettings } from '../../db/settings';
 import type { Category, Entry, Sequence } from '../../db/types';
+import { StyleGuidePrint } from '../export/StyleGuidePrint';
+import { exportVoiceoverScript } from '../export/voiceoverExport';
 import styles from './SequenceScreen.module.css';
 
 type Section = Sequence['sections'][number];
@@ -105,6 +107,7 @@ export function SequenceScreen({ onOpenEntry }: Props) {
   const [projectId, setProjectId] = useState('');
   const [generating, setGenerating] = useState(false);
   const [showStyleGuide, setShowStyleGuide] = useState(false);
+  const [showPrint, setShowPrint] = useState(false);
   const [sections, setSections] = useState<Section[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [versionIndex, setVersionIndex] = useState(0);
@@ -252,6 +255,7 @@ export function SequenceScreen({ onOpenEntry }: Props) {
   }, [sections]);
 
   const activeEntry = activeId ? entryMap.get(activeId) : undefined;
+  const activeProject = projects?.find((p) => p.id === projectId);
 
   const styleGuideGroups = useMemo(() => {
     if (!entries) return [];
@@ -317,7 +321,31 @@ export function SequenceScreen({ onOpenEntry }: Props) {
             {showStyleGuide ? t('sequence.hideStyleGuide') : t('sequence.showStyleGuide')}
           </button>
         )}
+
+        {entries && entries.length > 0 && activeProject && (
+          <div className={styles.actions}>
+            <button type="button" className={styles.actionButton} onClick={() => setShowPrint(true)}>
+              {t('sequence.exportPdf')}
+            </button>
+            <button
+              type="button"
+              className={styles.actionButton}
+              onClick={() => exportVoiceoverScript(activeProject, entries, current)}
+            >
+              {t('sequence.exportVoiceover')}
+            </button>
+          </div>
+        )}
       </div>
+
+      {showPrint && activeProject && entries && (
+        <StyleGuidePrint
+          project={activeProject}
+          entries={entries}
+          sequence={current}
+          onClose={() => setShowPrint(false)}
+        />
+      )}
 
       {showStyleGuide && (
         <div className={styles.styleGuidePanel}>

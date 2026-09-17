@@ -121,6 +121,8 @@ export interface Settings {
   activeProjectId?: string;
   styleGuide: string;
   lastResurfaceAt?: string;
+  lastDailyDigestAt?: string;
+  lastWeeklyDigestAt?: string;
   audioLog: {
     nextNumber: number;
     targetMinutes: number;
