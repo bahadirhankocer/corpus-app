@@ -140,8 +140,10 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-.options:hover .option:not(:hover) {
-  opacity: 0.35;
+@media (hover: hover) and (pointer: fine) {
+  .options:hover .option:not(:hover) {
+    opacity: 0.35;
+  }
 }
 
 .option:active {

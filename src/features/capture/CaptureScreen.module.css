@@ -36,16 +36,16 @@
   transform: scale(0.97);
 }
 
-.hero:has(.heroButton:first-child:active) .heroButton:last-child,
-.hero:has(.heroButton:first-child:hover) .heroButton:last-child {
-  opacity: 0.25;
-  transform: scale(0.97);
-}
+@media (hover: hover) and (pointer: fine) {
+  .hero:has(.heroButton:first-child:hover) .heroButton:last-child {
+    opacity: 0.25;
+    transform: scale(0.97);
+  }
 
-.hero:has(.heroButton:last-child:active) .heroButton:first-child,
-.hero:has(.heroButton:last-child:hover) .heroButton:first-child {
-  opacity: 0.25;
-  transform: scale(0.97);
+  .hero:has(.heroButton:last-child:hover) .heroButton:first-child {
+    opacity: 0.25;
+    transform: scale(0.97);
+  }
 }
 
 .heroStatus {
