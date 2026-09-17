@@ -1,0 +1,162 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  z-index: 15;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4);
+}
+
+.backButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-faint);
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.readingButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--space-4) var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.titleInput {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 28px;
+  letter-spacing: -0.01em;
+}
+
+.titleInput:focus {
+  outline: none;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.label {
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.warnings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border-radius: var(--radius);
+  background: var(--color-warning-muted);
+}
+
+.warningLine {
+  font-size: 12px;
+  color: var(--color-text);
+}
+
+.paragraph {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.paragraphText {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  resize: vertical;
+  min-height: 60px;
+}
+
+.paragraphText:focus {
+  outline: none;
+}
+
+.paragraphFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sources {
+  font-size: 11px;
+  color: var(--color-text-faint);
+}
+
+.rewriteButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.rewriteButton:disabled {
+  color: var(--color-text-faint);
+  cursor: default;
+}
+
+.textarea {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 80px;
+  resize: vertical;
+}
+
+.textarea:focus {
+  outline: none;
+}
+
+.exportRow {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.exportButton {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+}

@@ -4,6 +4,7 @@ import { SegmentedControl } from '../../components/SegmentedControl';
 import { useSettings, updateSettings } from '../../db/settings';
 import type { Settings } from '../../db/types';
 import { AiSection } from './AiSection';
+import { AudioLogSection } from './AudioLogSection';
 import { ProjectsSection } from './ProjectsSection';
 import styles from './SettingsScreen.module.css';
 
@@ -51,6 +52,7 @@ export function SettingsScreen() {
 
       <AiSection settings={settings} />
       <ProjectsSection settings={settings} />
+      <AudioLogSection settings={settings} />
     </div>
   );
 }

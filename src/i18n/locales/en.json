@@ -16,6 +16,7 @@
     "map": "Map",
     "sequence": "Sequence",
     "digests": "Digests",
+    "audiolog": "Log",
     "settings": "Settings"
   },
   "offline": {
@@ -103,6 +104,28 @@
     "daily": "Daily",
     "weekly": "Weekly"
   },
+  "audiolog": {
+    "title": "Audio Log",
+    "generate": "Prepare this week's log",
+    "generating": "Preparing…",
+    "empty": "No Audio Log yet.",
+    "status": {
+      "draft": "draft",
+      "final": "final",
+      "recorded": "recorded",
+      "published": "published"
+    },
+    "statusLabel": "Status",
+    "paragraphs": "Paragraphs",
+    "sourceCount": "{{count}} source",
+    "rewrite": "Rewrite",
+    "improveGeneric": "improve per the style guide",
+    "patreonIntro": "Patreon intro",
+    "exportMd": "Download MD",
+    "exportTxt": "Download TXT",
+    "exportPatreon": "Download Patreon text",
+    "readingMode": "Reading mode"
+  },
   "category": {
     "theme": "Theme / concept",
     "sound": "Sound / music",
@@ -134,6 +157,13 @@
       "keywordsLabel": "Keywords (comma separated)",
       "add": "+ New project",
       "noActiveProject": "No active project"
-    }
+    },
+    "styleGuide": "Style guide",
+    "audioLogTitle": "Audio Log",
+    "audioLogNextNumber": "Next number",
+    "audioLogTargetMinutes": "Target length (min)",
+    "audioLogWpm": "Words per minute",
+    "audioLogLang": "Audio Log language",
+    "audioLogCues": "Production cues"
   }
 }

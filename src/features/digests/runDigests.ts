@@ -8,6 +8,7 @@ import {
   shouldRunDailyDigest,
   shouldRunWeeklyDigest,
 } from '../../utils/digestSchedule';
+import { generateWeeklyAudioLog } from '../audiolog/generateAudioLog';
 
 async function entriesInRange(start: Date, end: Date) {
   const all = await db.entries.where('ai.status').equals('done').toArray();
@@ -46,6 +47,11 @@ export async function runDueDigests(): Promise<void> {
       } catch {
         // best-effort; try again next launch
       }
+    }
+    try {
+      await generateWeeklyAudioLog(settings);
+    } catch {
+      // best-effort; user can still trigger manually from the Audio Log screen
     }
     await updateSettings({ lastWeeklyDigestAt: new Date().toISOString() });
   }

@@ -16,6 +16,7 @@
     "map": "Harita",
     "sequence": "Sekans",
     "digests": "Özetler",
+    "audiolog": "Log",
     "settings": "Ayarlar"
   },
   "offline": {
@@ -103,6 +104,28 @@
     "daily": "Günlük",
     "weekly": "Haftalık"
   },
+  "audiolog": {
+    "title": "Audio Log",
+    "generate": "Bu haftanın log'unu hazırla",
+    "generating": "Hazırlanıyor…",
+    "empty": "Henüz Audio Log yok.",
+    "status": {
+      "draft": "taslak",
+      "final": "final",
+      "recorded": "kaydedildi",
+      "published": "yayınlandı"
+    },
+    "statusLabel": "Durum",
+    "paragraphs": "Paragraflar",
+    "sourceCount": "{{count}} kaynak",
+    "rewrite": "Yeniden yaz",
+    "improveGeneric": "stil kılavuzuna göre iyileştir",
+    "patreonIntro": "Patreon giriş metni",
+    "exportMd": "MD indir",
+    "exportTxt": "TXT indir",
+    "exportPatreon": "Patreon metnini indir",
+    "readingMode": "Okuma modu"
+  },
   "category": {
     "theme": "Tema / kavram",
     "sound": "Ses / müzik",
@@ -134,6 +157,13 @@
       "keywordsLabel": "Anahtar kelimeler (virgülle ayır)",
       "add": "+ Yeni proje",
       "noActiveProject": "Aktif proje yok"
-    }
+    },
+    "styleGuide": "Stil kılavuzu",
+    "audioLogTitle": "Audio Log",
+    "audioLogNextNumber": "Sıradaki numara",
+    "audioLogTargetMinutes": "Hedef süre (dk)",
+    "audioLogWpm": "Dakikadaki kelime",
+    "audioLogLang": "Audio Log dili",
+    "audioLogCues": "Yapım işaretleri"
   }
 }

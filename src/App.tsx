@@ -25,6 +25,9 @@ const SequenceScreen = lazy(() =>
 const DigestsScreen = lazy(() =>
   import('./features/digests/DigestsScreen').then((m) => ({ default: m.DigestsScreen })),
 );
+const AudioLogScreen = lazy(() =>
+  import('./features/audiolog/AudioLogScreen').then((m) => ({ default: m.AudioLogScreen })),
+);
 
 const RESURFACE_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
@@ -109,6 +112,14 @@ function App() {
             node: (
               <Suspense fallback={null}>
                 <DigestsScreen />
+              </Suspense>
+            ),
+          },
+          {
+            id: 'audiolog',
+            node: (
+              <Suspense fallback={null}>
+                <AudioLogScreen />
               </Suspense>
             ),
           },
