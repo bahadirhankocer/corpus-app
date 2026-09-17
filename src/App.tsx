@@ -18,6 +18,9 @@ import i18n from './i18n';
 import { ensurePersistentStorage } from './utils/persistStorage';
 
 const MapScreen = lazy(() => import('./features/map/MapScreen').then((m) => ({ default: m.MapScreen })));
+const SequenceScreen = lazy(() =>
+  import('./features/sequence/SequenceScreen').then((m) => ({ default: m.SequenceScreen })),
+);
 
 const RESURFACE_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
@@ -85,6 +88,14 @@ function App() {
             node: (
               <Suspense fallback={null}>
                 <MapScreen onOpenEntry={setOpenEntryId} />
+              </Suspense>
+            ),
+          },
+          {
+            id: 'sequence',
+            node: (
+              <Suspense fallback={null}>
+                <SequenceScreen onOpenEntry={setOpenEntryId} />
               </Suspense>
             ),
           },

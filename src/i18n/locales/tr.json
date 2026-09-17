@@ -14,6 +14,7 @@
     "capture": "Yakala",
     "feed": "Akış",
     "map": "Harita",
+    "sequence": "Sekans",
     "settings": "Ayarlar"
   },
   "offline": {
@@ -72,6 +73,19 @@
     "empty": "Bu projede işlenmiş girdi yok.",
     "accept": "Kabul et",
     "reject": "Reddet"
+  },
+  "sequence": {
+    "generate": "AI taslağı oluştur",
+    "generating": "Oluşturuluyor…",
+    "sourceAi": "AI",
+    "sourceUser": "düzenlendi",
+    "removeSection": "Kaldır",
+    "newSection": "Yeni bölüm",
+    "unplaced": "Yerleşmemiş",
+    "addSection": "+ Bölüm ekle",
+    "empty": "Henüz sekans yok. AI taslağı oluştur ya da bölüm ekle.",
+    "showStyleGuide": "Stil özetini göster",
+    "hideStyleGuide": "Stil özetini gizle"
   },
   "category": {
     "theme": "Tema / kavram",
