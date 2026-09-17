@@ -13,6 +13,7 @@
   "nav": {
     "capture": "Yakala",
     "feed": "Akış",
+    "map": "Harita",
     "settings": "Ayarlar"
   },
   "offline": {
@@ -65,6 +66,12 @@
   "resurface": {
     "skip": "Geç",
     "writePlaceholder": "Bunun üzerine yaz…"
+  },
+  "map": {
+    "noProjects": "Henüz proje yok",
+    "empty": "Bu projede işlenmiş girdi yok.",
+    "accept": "Kabul et",
+    "reject": "Reddet"
   },
   "category": {
     "theme": "Tema / kavram",

@@ -1,14 +1,17 @@
 import { classifyEntry } from './classify';
 import { generateFollowUp } from './followup';
 import { GeminiRateLimitError } from './gemini';
+import { findLinks } from './links';
 import { getAudioBlob } from '../db/audio';
 import { db } from '../db/db';
 import { createFollowUp, hasPendingFollowUp } from '../db/followups';
+import { createSuggestedLink } from '../db/links';
 import { ensureSettings } from '../db/settings';
 import type { Entry } from '../db/types';
 
 const MIN_BACKOFF_MS = 2000;
 const MAX_BACKOFF_MS = 60000;
+const LINK_CANDIDATE_LIMIT = 50;
 
 let running = false;
 
@@ -17,6 +20,23 @@ async function maybeGenerateFollowUp(entry: Entry, apiKey: string, model: string
     if (await hasPendingFollowUp(entry.id)) return;
     const result = await generateFollowUp(entry, apiKey, model);
     await createFollowUp(entry.id, result.question, result.options);
+  } catch {
+    // best-effort enhancement; classification already succeeded, don't surface this failure
+  }
+}
+
+async function maybeFindLinks(entry: Entry, projectId: string | undefined, apiKey: string, model: string): Promise<void> {
+  if (!projectId) return;
+  try {
+    const candidates = (
+      await db.entries.where('ai.projectId').equals(projectId).reverse().sortBy('createdAt')
+    )
+      .filter((c) => c.id !== entry.id && c.ai.status === 'done')
+      .slice(0, LINK_CANDIDATE_LIMIT);
+    const suggestions = await findLinks(entry, candidates, apiKey, model);
+    for (const s of suggestions) {
+      await createSuggestedLink(entry.id, s.toId, s.kind, s.rationale);
+    }
   } catch {
     // best-effort enhancement; classification already succeeded, don't surface this failure
   }
@@ -52,15 +72,13 @@ async function processOne(): Promise<'processed' | 'empty' | 'skipped'> {
         'ai.error': undefined,
         'sync.dirty': true,
       });
-      void maybeGenerateFollowUp(
-        {
-          ...entry,
-          transcript: result.transcript || entry.transcript,
-          ai: { ...entry.ai, categories: result.categories, tags: result.tags, summary: result.summary },
-        },
-        settings.geminiApiKey,
-        settings.model,
-      );
+      const updatedEntry: Entry = {
+        ...entry,
+        transcript: result.transcript || entry.transcript,
+        ai: { ...entry.ai, categories: result.categories, tags: result.tags, summary: result.summary },
+      };
+      void maybeGenerateFollowUp(updatedEntry, settings.geminiApiKey, settings.model);
+      void maybeFindLinks(updatedEntry, result.projectId ?? undefined, settings.geminiApiKey, settings.model);
       return 'processed';
     } catch (err) {
       if (err instanceof GeminiRateLimitError) {

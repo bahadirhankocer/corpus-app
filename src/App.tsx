@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 import { kickAiQueue } from './ai/queue';
 import { BottomNav } from './app/BottomNav';
@@ -15,6 +15,8 @@ import { Resurface } from './features/resurface/Resurface';
 import { SettingsScreen } from './features/settings/SettingsScreen';
 import i18n from './i18n';
 import { ensurePersistentStorage } from './utils/persistStorage';
+
+const MapScreen = lazy(() => import('./features/map/MapScreen').then((m) => ({ default: m.MapScreen })));
 
 const RESURFACE_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
@@ -74,6 +76,11 @@ function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {screen === 'capture' && <CaptureScreen onOpenFollowUp={() => setFollowUpOpen(true)} />}
         {screen === 'feed' && <FeedScreen onOpenEntry={setOpenEntryId} />}
+        {screen === 'map' && (
+          <Suspense fallback={null}>
+            <MapScreen onOpenEntry={setOpenEntryId} />
+          </Suspense>
+        )}
         {screen === 'settings' && <SettingsScreen />}
       </div>
       <BottomNav active={screen} onChange={setScreen} />

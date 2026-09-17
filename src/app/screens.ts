@@ -1,3 +1,3 @@
-export type ScreenId = 'capture' | 'feed' | 'settings';
+export type ScreenId = 'capture' | 'feed' | 'map' | 'settings';
 
-export const SCREENS: ScreenId[] = ['capture', 'feed', 'settings'];
+export const SCREENS: ScreenId[] = ['capture', 'feed', 'map', 'settings'];

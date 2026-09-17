@@ -2,6 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuid } from 'uuid';
 
 import { db } from './db';
+import { effectiveProjectId } from './effective';
 import type { Category, Entry } from './types';
 
 export interface NewEntryInput {
@@ -72,6 +73,14 @@ export function useEntry(id: string | undefined): Entry | undefined {
 
 export function usePendingCount(): number | undefined {
   return useLiveQuery(() => db.entries.where('ai.status').equals('pending').count(), []);
+}
+
+export function useEntriesForProject(projectId: string | undefined): Entry[] | undefined {
+  return useLiveQuery(async () => {
+    if (!projectId) return [];
+    const all = await db.entries.where('ai.status').equals('done').toArray();
+    return all.filter((e) => effectiveProjectId(e) === projectId);
+  }, [projectId]);
 }
 
 export function useChildren(entryId: string | undefined): Entry[] | undefined {
