@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 import { kickAiQueue } from './ai/queue';
 import { BottomNav } from './app/BottomNav';
 import type { ScreenId } from './app/screens';
+import { SwipeDeck } from './app/SwipeDeck';
 import { OfflineStrip } from './components/OfflineStrip';
 import { markSurfaced, pickResurfaceCandidate } from './db/entries';
 import { ensureSettings, updateSettings, useSettings } from './db/settings';
@@ -73,16 +74,23 @@ function App() {
   return (
     <>
       <OfflineStrip />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {screen === 'capture' && <CaptureScreen onOpenFollowUp={() => setFollowUpOpen(true)} />}
-        {screen === 'feed' && <FeedScreen onOpenEntry={setOpenEntryId} />}
-        {screen === 'map' && (
-          <Suspense fallback={null}>
-            <MapScreen onOpenEntry={setOpenEntryId} />
-          </Suspense>
-        )}
-        {screen === 'settings' && <SettingsScreen />}
-      </div>
+      <SwipeDeck
+        active={screen}
+        onChange={setScreen}
+        panels={[
+          { id: 'capture', node: <CaptureScreen onOpenFollowUp={() => setFollowUpOpen(true)} /> },
+          { id: 'feed', node: <FeedScreen onOpenEntry={setOpenEntryId} /> },
+          {
+            id: 'map',
+            node: (
+              <Suspense fallback={null}>
+                <MapScreen onOpenEntry={setOpenEntryId} />
+              </Suspense>
+            ),
+          },
+          { id: 'settings', node: <SettingsScreen /> },
+        ]}
+      />
       <BottomNav active={screen} onChange={setScreen} />
       {openEntryId && (
         <EntryDetail
