@@ -13,6 +13,14 @@ export interface ChangelogRelease {
 /** Newest first. Add a release here whenever `version` in package.json is bumped. */
 export const CHANGELOG: ChangelogRelease[] = [
   {
+    version: '0.2.2',
+    date: '2026-09-18',
+    title: { tr: 'Büyük harf', en: 'Capital letters' },
+    items: [
+      { tr: 'Büyük harfle yazılan etiketlerde İ yerine I kullanılıyor (ör. "ATELIER", "REPETITION").', en: 'Uppercase labels use a plain I instead of the dotted İ (for example "ATELIER", "REPETITION").' },
+    ],
+  },
+  {
     version: '0.2.1',
     date: '2026-09-18',
     title: { tr: 'Hizalama', en: 'Alignment' },
