@@ -12,6 +12,7 @@ body,
 
 body {
   margin: 0;
+  line-height: 1.4;
   background: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans);
@@ -31,6 +32,32 @@ select {
 #root {
   display: flex;
   flex-direction: column;
+}
+
+.toast {
+  position: fixed;
+  top: max(var(--space-3), env(safe-area-inset-top));
+  left: 50%;
+  z-index: 60;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  animation: toast 3.2s ease both;
+  pointer-events: none;
+}
+
+@keyframes toast {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  12%,
+  80% {
+    opacity: 1;
+  }
 }
 
 @media print {

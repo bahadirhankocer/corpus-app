@@ -36,13 +36,13 @@ export function usePendingFollowUp(): PendingFollowUp | undefined {
   }, []);
 }
 
-export async function answerFollowUp(followUpId: string, optionIndex: number): Promise<void> {
+export async function answerFollowUp(followUpId: string, answerText: number | string): Promise<void> {
   const followUp = await db.followups.get(followUpId);
   if (!followUp) return;
   const parentEntry = await db.entries.get(followUp.entryId);
   const answer = await createEntry({
     kind: 'text',
-    text: followUp.options[optionIndex],
+    text: typeof answerText === 'number' ? followUp.options[answerText] : answerText,
     importance: parentEntry?.importance ?? 2,
     parentEntryId: followUp.entryId,
   });

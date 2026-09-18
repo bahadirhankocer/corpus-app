@@ -1,0 +1,241 @@
+.screen {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: max(var(--space-4), env(safe-area-inset-top)) var(--space-4) var(--space-4);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kicker {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 34px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.status,
+.micro,
+.thoughtMeta {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.calls {
+  opacity: 0.8;
+}
+
+.canvas {
+  position: relative;
+  flex: none;
+  height: min(46vh, 420px);
+  margin: 0 calc(var(--space-2) * -1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty {
+  max-width: 18em;
+  margin: 0;
+  text-align: center;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-text-faint);
+}
+
+.question {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text);
+  cursor: pointer;
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+}
+
+.chip {
+  padding: 2px 0;
+  border: none;
+  background: none;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 20px;
+  letter-spacing: -0.01em;
+  color: var(--color-text-faint);
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.chip[data-active='true'] {
+  color: var(--color-text);
+}
+
+.compendium {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.compendiumText {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--color-text-muted);
+  white-space: pre-line;
+}
+
+.manifesto {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-faint);
+}
+
+.muted {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-faint);
+  line-height: 1.5;
+}
+
+.textButton {
+  align-self: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  font-size: 13px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.thoughts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.thoughtButton {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.thoughtButton:disabled {
+  cursor: default;
+}
+
+.thoughtText {
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.01em;
+  color: var(--color-text);
+}
+
+.index {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--space-3);
+}
+
+.indexItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: 6px 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.indexItem:active {
+  transform: translateX(4px);
+}
+
+.indexNumber {
+  width: 1.6em;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--color-text-faint);
+}
+
+.indexName {
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 30px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  color: var(--color-text);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .index:has(.indexItem:hover) .indexItem:not(:hover) {
+    opacity: 0.3;
+  }
+}
+
+.footer {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--color-text-faint);
+}

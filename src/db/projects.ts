@@ -22,7 +22,10 @@ export async function createProject(input: NewProjectInput): Promise<Project> {
   return project;
 }
 
-export async function updateProject(id: string, patch: Partial<NewProjectInput & { status: Project['status'] }>): Promise<void> {
+export async function updateProject(
+  id: string,
+  patch: Partial<NewProjectInput & Pick<Project, 'status' | 'manifesto' | 'procedure' | 'compendium' | 'compendiumUpdatedAt'>>,
+): Promise<void> {
   await db.projects.update(id, patch);
 }
 

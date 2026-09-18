@@ -11,40 +11,66 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+  align-items: center;
   position: relative;
+  overflow: hidden;
+}
+
+.topRow {
+  display: flex;
+  justify-content: center;
+  padding-top: max(var(--space-4), env(safe-area-inset-top));
+  z-index: 1;
+}
+
+.heroButtons {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  z-index: 1;
 }
 
 .heroButton {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--space-2) var(--space-5);
   border: none;
   background: none;
   color: var(--color-text);
   font-family: var(--font-display);
   font-weight: 300;
-  font-size: clamp(40px, 11vw, 64px);
-  letter-spacing: -0.01em;
+  font-size: clamp(64px, 20vw, 92px);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
   cursor: pointer;
   transition:
     opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    letter-spacing 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .heroButton:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
+  letter-spacing: -0.01em;
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .hero:has(.heroButton:first-child:hover) .heroButton:last-child {
-    opacity: 0.25;
+  .heroButtons:has(.heroButton:first-child:hover) .heroButton:last-child {
+    opacity: 0.22;
     transform: scale(0.97);
   }
 
-  .hero:has(.heroButton:last-child:hover) .heroButton:first-child {
-    opacity: 0.25;
+  .heroButtons:has(.heroButton:last-child:hover) .heroButton:first-child {
+    opacity: 0.22;
     transform: scale(0.97);
+  }
+
+  .heroButton:hover {
+    letter-spacing: -0.01em;
   }
 }
 
@@ -54,11 +80,14 @@
   left: 0;
   right: 0;
   text-align: center;
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--color-text-faint);
 }
 
-.followUpNudge {
+.nudge {
   position: absolute;
   bottom: var(--space-5);
   left: 0;
@@ -66,14 +95,18 @@
   background: none;
   border: none;
   text-align: center;
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
   cursor: pointer;
   animation: pulse 3s ease-in-out infinite;
+  z-index: 1;
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 0.6; }
+  0%, 100% { opacity: 0.55; }
   50% { opacity: 1; }
 }
 

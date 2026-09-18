@@ -41,3 +41,7 @@ export function useLinksForEntries(entryIds: string[]): Link[] | undefined {
     return all.filter((l) => idSet.has(l.fromId) && idSet.has(l.toId) && l.state !== 'dismissed');
   }, [entryIds.join(',')]);
 }
+
+export function useAllLinks(): Link[] | undefined {
+  return useLiveQuery(() => db.links.filter((l) => l.state !== 'dismissed').toArray(), []);
+}

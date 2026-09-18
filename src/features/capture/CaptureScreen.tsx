@@ -2,10 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { kickAiQueue } from '../../ai/queue';
+import { AiDot } from '../../components/AiDot';
+import { Rings } from '../../components/Rings';
 import { TextChoice } from '../../components/TextChoice';
 import { saveAudioBlob } from '../../db/audio';
 import { createEntry } from '../../db/entries';
-import { usePendingFollowUp } from '../../db/followups';
+import { useQuestions } from '../../db/questions';
 import type { Entry } from '../../db/types';
 import styles from './CaptureScreen.module.css';
 import { type RecordedAudio, useAudioRecorder } from './useAudioRecorder';
@@ -19,10 +21,11 @@ function formatTimer(sec: number): string {
 }
 
 interface Props {
-  onOpenFollowUp: () => void;
+  onOpenQuestion: () => void;
+  onOpenAtelier: () => void;
 }
 
-export function CaptureScreen({ onOpenFollowUp }: Props) {
+export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('none');
   const [text, setText] = useState('');
@@ -35,7 +38,8 @@ export function CaptureScreen({ onOpenFollowUp }: Props) {
   const recorder = useAudioRecorder();
   const audioUrlRef = useRef<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const pendingFollowUp = usePendingFollowUp();
+  const questions = useQuestions();
+  const waiting = questions?.length ?? 0;
 
   useEffect(() => {
     if (recorder.state !== 'recording') {
@@ -52,6 +56,15 @@ export function CaptureScreen({ onOpenFollowUp }: Props) {
       if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
     };
   }, []);
+
+  // While writing or recording the deck must not react to horizontal drags.
+  useEffect(() => {
+    if (mode === 'none') delete document.documentElement.dataset.writing;
+    else document.documentElement.dataset.writing = '';
+    return () => {
+      delete document.documentElement.dataset.writing;
+    };
+  }, [mode]);
 
   function reset() {
     setMode('none');
@@ -122,15 +135,21 @@ export function CaptureScreen({ onOpenFollowUp }: Props) {
   if (mode === 'none') {
     return (
       <div className={styles.hero}>
-        <button type="button" className={styles.heroButton} onClick={() => setMode('text')}>
-          {t('capture.writeButton')}
-        </button>
-        <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
-          {t('capture.recordButton')}
-        </button>
-        {pendingFollowUp && !savedFlash && (
-          <button type="button" className={styles.followUpNudge} onClick={onOpenFollowUp}>
-            {t('followup.nudge')}
+        <Rings />
+        <div className={styles.topRow}>
+          <AiDot onClick={onOpenAtelier} />
+        </div>
+        <div className={styles.heroButtons}>
+          <button type="button" className={styles.heroButton} onClick={() => setMode('text')}>
+            {t('capture.writeButton')}
+          </button>
+          <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
+            {t('capture.recordButton')}
+          </button>
+        </div>
+        {waiting > 0 && !savedFlash && (
+          <button type="button" className={styles.nudge} onClick={onOpenQuestion}>
+            {t('question.waiting', { count: waiting })}
           </button>
         )}
         {savedFlash && <div className={styles.heroStatus}>{t('capture.saved')}</div>}

@@ -6,9 +6,14 @@ import type { Settings } from '../../db/types';
 import { AiSection } from './AiSection';
 import { AudioLogSection } from './AudioLogSection';
 import { ProjectsSection } from './ProjectsSection';
+import { PromptsSection } from './PromptsSection';
 import styles from './SettingsScreen.module.css';
 
-export function SettingsScreen() {
+interface Props {
+  onStartInterview: (projectId: string) => void;
+}
+
+export function SettingsScreen({ onStartInterview }: Props) {
   const { t, i18n } = useTranslation();
   const settings = useSettings();
 
@@ -51,7 +56,8 @@ export function SettingsScreen() {
       </div>
 
       <AiSection settings={settings} />
-      <ProjectsSection settings={settings} />
+      <PromptsSection settings={settings} />
+      <ProjectsSection settings={settings} onStartInterview={onStartInterview} />
       <AudioLogSection settings={settings} />
     </div>
   );

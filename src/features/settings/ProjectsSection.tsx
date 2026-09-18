@@ -67,9 +67,10 @@ function ProjectForm({
 
 interface Props {
   settings: Settings;
+  onStartInterview: (projectId: string) => void;
 }
 
-export function ProjectsSection({ settings }: Props) {
+export function ProjectsSection({ settings, onStartInterview }: Props) {
   const { t } = useTranslation();
   const projects = useProjects();
   const [adding, setAdding] = useState(false);
@@ -83,12 +84,14 @@ export function ProjectsSection({ settings }: Props) {
   }
 
   async function handleCreate(values: FormValues) {
-    await createProject({
+    const project = await createProject({
       name: values.name.trim(),
       description: values.description.trim(),
       keywords: parseKeywords(values.keywords),
     });
     setAdding(false);
+    // A new project gets its subtext through the short interview, when the AI is available.
+    if (settings.aiEnabled && settings.geminiApiKey) onStartInterview(project.id);
   }
 
   async function handleUpdate(id: string, values: FormValues) {
@@ -153,6 +156,12 @@ export function ProjectsSection({ settings }: Props) {
                 </div>
               </div>
               {project.description && <span className={styles.desc}>{project.description}</span>}
+              {project.manifesto && <span className={styles.desc}>{project.manifesto}</span>}
+              {settings.aiEnabled && settings.geminiApiKey && (
+                <button type="button" className={styles.linkButton} onClick={() => onStartInterview(project.id)}>
+                  {project.manifesto ? t('settings.projects.redoInterview') : t('settings.projects.interview')}
+                </button>
+              )}
               {project.keywords.length > 0 && (
                 <span className={styles.keywords}>{project.keywords.join(' · ')}</span>
               )}

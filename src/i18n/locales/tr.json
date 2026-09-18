@@ -8,7 +8,8 @@
     "cancel": "Vazgeç",
     "back": "Geri",
     "delete": "Sil",
-    "edit": "Düzenle"
+    "edit": "Düzenle",
+    "close": "Kapat"
   },
   "nav": {
     "capture": "Yakala",
@@ -17,7 +18,8 @@
     "sequence": "Sekans",
     "digests": "Özetler",
     "audiolog": "Log",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "atelier": "Atölye"
   },
   "offline": {
     "label": "çevrimdışı",
@@ -144,11 +146,16 @@
       "privacyNotice": "Gizlilik: Gemini ücretsiz katmanında gönderilen içerik Google tarafından ürün geliştirme için kullanılabilir. Yayınlanmamış fikirler için bunu göz önünde bulundur. API anahtarı yalnızca bu cihazda saklanır, hiçbir yere gönderilmez.",
       "apiKeyLabel": "Gemini API anahtarı",
       "apiKeyHint": "Yalnızca bu cihazda saklanır.",
-      "apiKeySaved": "Kayıtlı · yalnızca bu cihazda",
+      "apiKeySaved": "Kayıtlı. Yalnızca bu cihazda saklanır.",
       "modelLabel": "Model adı",
       "enabledLabel": "AI işleme",
       "on": "Açık",
-      "off": "Kapalı"
+      "off": "Kapalı",
+      "change": "Anahtarı değiştir",
+      "copyLink": "Kurulum linkini kopyala",
+      "copied": "Kopyalandı",
+      "setupHint": "Anahtarı bir kez yapıştır, bir daha sorulmaz. Başka cihaz için kurulum linki oluşturabilirsin.",
+      "setupDone": "Anahtar kaydedildi"
     },
     "projects": {
       "title": "Projeler",
@@ -156,7 +163,9 @@
       "descriptionLabel": "Açıklama",
       "keywordsLabel": "Anahtar kelimeler (virgülle ayır)",
       "add": "+ Yeni proje",
-      "noActiveProject": "Aktif proje yok"
+      "noActiveProject": "Aktif proje yok",
+      "interview": "Görüşme yap",
+      "redoInterview": "Görüşmeyi yenile"
     },
     "styleGuide": "Stil kılavuzu",
     "audioLogTitle": "Audio Log",
@@ -164,6 +173,79 @@
     "audioLogTargetMinutes": "Hedef süre (dk)",
     "audioLogWpm": "Dakikadaki kelime",
     "audioLogLang": "Audio Log dili",
-    "audioLogCues": "Yapım işaretleri"
+    "audioLogCues": "Yapım işaretleri",
+    "prompts": {
+      "title": "AI soruları",
+      "perDay": "Günde kaç soru",
+      "from": "Başlangıç saati",
+      "to": "Bitiş saati",
+      "push": {
+        "label": "Bildirim",
+        "hint": "Sorular rastgele saatlerde bildirimle gelir.",
+        "unsupported": "Bu tarayıcıda bildirim desteklenmiyor. Uygulamayı ana ekrana ekleyip yeniden dene.",
+        "no-worker": "Bildirim sunucusu (Cloudflare Worker) henüz kurulmadı. Kurulum adımları worker/README.md içinde.",
+        "denied": "Bildirim izni verilmedi.",
+        "error": "Bildirim açılamadı. Sunucuya ulaşılamadı."
+      }
+    }
+  },
+  "layer": {
+    "code": "Katman {{n}}",
+    "map": "Harita",
+    "sequence": "Sekans",
+    "digests": "Özetler",
+    "audiolog": "Audio Log",
+    "settings": "Ayarlar",
+    "versions": "Sürümler"
+  },
+  "atelier": {
+    "state": {
+      "idle": "sakin",
+      "thinking": "düşünüyor",
+      "waiting": "kota bekliyor"
+    },
+    "noKey": "anahtar yok",
+    "calls": "{{count}} çağrı",
+    "empty": "Harita ilk girdi işlendiğinde belirmeye başlar.",
+    "thoughts": "Düşünceler",
+    "noThoughts": "AI her yeni girdide burada kısa düşünceler bırakacak.",
+    "noCompendium": "Bu proje için derleme, ilk girdiler işlendikçe oluşacak.",
+    "manifesto": "Manifesto",
+    "startInterview": "Proje görüşmesini başlat",
+    "kind": {
+      "pattern": "örüntü",
+      "imagine": "hayal",
+      "sequence": "sekans",
+      "connection": "bağ",
+      "contradiction": "çelişki",
+      "note": "not"
+    }
+  },
+  "question": {
+    "skip": "Geç",
+    "scrollHint": "aşağı kaydır",
+    "ownWords": "Kendi cümlemle",
+    "writePlaceholder": "Yaz…",
+    "send": "Gönder",
+    "waiting_one": "bir soru seni bekliyor",
+    "waiting_other": "{{count}} soru seni bekliyor",
+    "kind": {
+      "followup": "devam sorusu",
+      "deepen": "derinleş",
+      "imagine": "hayal et",
+      "sequence": "sekans",
+      "pattern": "örüntü"
+    }
+  },
+  "interview": {
+    "later": "Sonra",
+    "thinking": "AI bir soru hazırlıyor…",
+    "composing": "Manifesto ve prosedür yazılıyor…",
+    "procedure": "Çalışma prosedürü",
+    "error": "Görüşme sürdürülemedi. Bağlantını ve API anahtarını kontrol et."
+  },
+  "versions": {
+    "current": "Şu anki sürüm",
+    "built": "derlendi"
   }
 }

@@ -9,11 +9,12 @@
   background: none;
   padding: 0;
   color: var(--color-text-faint);
-  font-size: 15px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
   cursor: pointer;
 }
 
 .chip[data-active='true'] {
   color: var(--color-text);
-  font-weight: 500;
 }

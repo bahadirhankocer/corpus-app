@@ -12,7 +12,17 @@ interface Props {
   onOpenEntry: (id: string) => void;
 }
 
-function EntryCard({ entry, onOpen, projects }: { entry: Entry; onOpen: () => void; projects: Project[] | undefined }) {
+function EntryCard({
+  entry,
+  number,
+  onOpen,
+  projects,
+}: {
+  entry: Entry;
+  number: number;
+  onOpen: () => void;
+  projects: Project[] | undefined;
+}) {
   const { t, i18n } = useTranslation();
   const preview = entry.title || entry.text || entry.transcript || t('feed.voicePlaceholder');
   const categories = effectiveCategories(entry);
@@ -23,21 +33,24 @@ function EntryCard({ entry, onOpen, projects }: { entry: Entry; onOpen: () => vo
     entry.kind === 'voice' ? t('feed.kindVoice') : t('feed.kindText'),
     categories.map((c) => CATEGORY_CODES[c]).join(' '),
     project?.name ?? entry.context,
-    t(`feed.aiStatus.${entry.ai.status}`),
+    entry.ai.status === 'done' ? '' : t(`feed.aiStatus.${entry.ai.status}`),
     formatDateTime(entry.createdAt, i18n.language),
   ].filter(Boolean);
 
   return (
     <button type="button" className={styles.card} onClick={onOpen}>
-      <div className={styles.preview}>{preview}</div>
-      <div className={styles.meta}>
-        <span>{metaParts.join(' · ')}</span>
-        <div className={styles.dots}>
-          {[1, 2, 3].map((n) => (
-            <span key={n} className={styles.dot} data-filled={n <= entry.importance} />
-          ))}
-        </div>
-      </div>
+      <span className={styles.number}>{String(number).padStart(3, '0')}</span>
+      <span className={styles.body}>
+        <span className={styles.preview}>{preview}</span>
+        <span className={styles.meta}>
+          <span className={styles.metaText}>{metaParts.join(' · ')}</span>
+          <span className={styles.dots}>
+            {[1, 2, 3].map((n) => (
+              <span key={n} className={styles.dot} data-filled={n <= entry.importance} />
+            ))}
+          </span>
+        </span>
+      </span>
     </button>
   );
 }
@@ -49,10 +62,22 @@ export function FeedScreen({ onOpenEntry }: Props) {
 
   return (
     <div className={styles.screen}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>{t('nav.feed')}</h1>
+        {entries && entries.length > 0 && <span className={styles.count}>{entries.length}</span>}
+      </header>
       {entries && entries.length === 0 && <div className={styles.empty}>{t('feed.empty')}</div>}
-      {entries?.map((entry) => (
-        <EntryCard key={entry.id} entry={entry} onOpen={() => onOpenEntry(entry.id)} projects={projects} />
-      ))}
+      <div className={styles.list}>
+        {entries?.map((entry, i) => (
+          <EntryCard
+            key={entry.id}
+            entry={entry}
+            number={entries.length - i}
+            onOpen={() => onOpenEntry(entry.id)}
+            projects={projects}
+          />
+        ))}
+      </div>
     </div>
   );
 }

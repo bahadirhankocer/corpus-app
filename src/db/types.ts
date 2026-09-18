@@ -24,6 +24,8 @@ export interface Entry {
     summary?: string;
     error?: string;
     processedAt?: string;
+    /** false while the reflection chain (follow-up, links, thoughts) is still owed */
+    enriched?: boolean;
   };
   overrides: {
     categories?: Category[];
@@ -47,6 +49,39 @@ export interface Project {
   description: string;
   keywords: string[];
   status: 'active' | 'archived';
+  /** what this project is really about, written by the AI after the interview */
+  manifesto?: string;
+  /** how the AI should work inside this project */
+  procedure?: string;
+  /** the AI's living compendium of the project, revised after every entry */
+  compendium?: string;
+  compendiumUpdatedAt?: string;
+}
+
+export type ThoughtKind = 'connection' | 'contradiction' | 'pattern' | 'imagine' | 'sequence' | 'note';
+
+export interface Thought {
+  id: string;
+  kind: ThoughtKind;
+  text: string;
+  entryIds: string[];
+  projectId?: string;
+  createdAt: string;
+}
+
+export type PromptKind = 'deepen' | 'imagine' | 'sequence' | 'pattern';
+
+export interface Prompt {
+  id: string;
+  kind: PromptKind;
+  projectId?: string;
+  /** why the AI is asking, shown before the question */
+  context: string;
+  question: string;
+  options: string[];
+  status: 'pending' | 'answered' | 'skipped';
+  answerEntryId?: string;
+  createdAt: string;
 }
 
 export interface FollowUp {
@@ -130,6 +165,15 @@ export interface Settings {
     lang: 'tr' | 'en';
     cues: boolean;
   };
+  /** proactive questions and their push notifications */
+  prompts: {
+    perDay: 1 | 2 | 3;
+    startHour: number;
+    endHour: number;
+    lastCreatedAt?: string;
+  };
+  pushWorkerUrl?: string;
+  pushSubscribed?: boolean;
 }
 
 export const DEFAULT_STYLE_GUIDE = `Register: duru. Süssüz, açık, fazla açıklamasız, kasıntısız.
@@ -144,9 +188,9 @@ Akademik atıf yapılırsa sayfa numarası zorunlu (ör. "Koçer, 2023, s. 14").
 export const DEFAULT_SETTINGS: Settings = {
   id: 'app',
   lang: 'tr',
-  theme: 'system',
+  theme: 'dark',
   model: 'gemini-2.5-flash',
-  aiEnabled: false,
+  aiEnabled: true,
   driveConnected: false,
   styleGuide: DEFAULT_STYLE_GUIDE,
   audioLog: {
@@ -156,4 +200,5 @@ export const DEFAULT_SETTINGS: Settings = {
     lang: 'tr',
     cues: true,
   },
+  prompts: { perDay: 2, startHour: 9, endHour: 22 },
 };

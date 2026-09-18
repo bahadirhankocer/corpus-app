@@ -19,7 +19,8 @@
 .progressFill {
   height: 100%;
   background: var(--color-text-faint);
-  transition: width 0.1s linear;
+  transform-origin: left;
+  will-change: transform;
 }
 
 .topBar {
@@ -82,7 +83,7 @@
   justify-content: center;
   padding: var(--space-6) var(--space-5);
   text-align: center;
-  gap: var(--space-5);
+  gap: var(--space-4);
   opacity: 0;
   transform: translateY(16px);
   transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -93,11 +94,69 @@
   transform: translateY(0);
 }
 
+.kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
 .originText {
-  font-size: 18px;
-  line-height: 1.5;
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.45;
   color: var(--color-text-muted);
-  max-width: 34em;
+  max-width: 30em;
+}
+
+.ownWords {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--color-text-faint);
+  cursor: pointer;
+}
+
+.write {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 28em;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 96px;
+  padding: var(--space-3);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-raised);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.45;
+  resize: none;
+}
+
+.textarea:focus {
+  outline: none;
+}
+
+.send {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.send:disabled {
+  color: var(--color-text-faint);
+  font-weight: 400;
 }
 
 .hint {
@@ -117,13 +176,14 @@
   font-size: clamp(28px, 7vw, 44px);
   letter-spacing: -0.01em;
   max-width: 18em;
-  line-height: 1.25;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .options {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
   width: 100%;
   max-width: 28em;
 }

@@ -8,7 +8,8 @@
     "cancel": "Cancel",
     "back": "Back",
     "delete": "Delete",
-    "edit": "Edit"
+    "edit": "Edit",
+    "close": "Close"
   },
   "nav": {
     "capture": "Capture",
@@ -17,7 +18,8 @@
     "sequence": "Sequence",
     "digests": "Digests",
     "audiolog": "Log",
-    "settings": "Settings"
+    "settings": "Settings",
+    "atelier": "Atelier"
   },
   "offline": {
     "label": "offline",
@@ -144,11 +146,16 @@
       "privacyNotice": "Privacy: content sent on Gemini's free tier may be used by Google for product development. Keep this in mind for unpublished ideas. The API key is stored only on this device and never sent anywhere else.",
       "apiKeyLabel": "Gemini API key",
       "apiKeyHint": "Stored only on this device.",
-      "apiKeySaved": "Saved · stored only on this device",
+      "apiKeySaved": "Saved. Stored only on this device.",
       "modelLabel": "Model name",
       "enabledLabel": "AI processing",
       "on": "On",
-      "off": "Off"
+      "off": "Off",
+      "change": "Replace key",
+      "copyLink": "Copy setup link",
+      "copied": "Copied",
+      "setupHint": "Paste the key once and you will never be asked again. You can create a setup link for another device.",
+      "setupDone": "Key saved"
     },
     "projects": {
       "title": "Projects",
@@ -156,7 +163,9 @@
       "descriptionLabel": "Description",
       "keywordsLabel": "Keywords (comma separated)",
       "add": "+ New project",
-      "noActiveProject": "No active project"
+      "noActiveProject": "No active project",
+      "interview": "Run interview",
+      "redoInterview": "Redo interview"
     },
     "styleGuide": "Style guide",
     "audioLogTitle": "Audio Log",
@@ -164,6 +173,79 @@
     "audioLogTargetMinutes": "Target length (min)",
     "audioLogWpm": "Words per minute",
     "audioLogLang": "Audio Log language",
-    "audioLogCues": "Production cues"
+    "audioLogCues": "Production cues",
+    "prompts": {
+      "title": "AI questions",
+      "perDay": "Questions per day",
+      "from": "Start hour",
+      "to": "End hour",
+      "push": {
+        "label": "Notifications",
+        "hint": "Questions arrive as notifications at random hours.",
+        "unsupported": "Notifications are not supported in this browser. Add the app to the home screen and try again.",
+        "no-worker": "The notification server (Cloudflare Worker) is not set up yet. See worker/README.md.",
+        "denied": "Notification permission was not granted.",
+        "error": "Could not turn notifications on. The server was unreachable."
+      }
+    }
+  },
+  "layer": {
+    "code": "Layer {{n}}",
+    "map": "Map",
+    "sequence": "Sequence",
+    "digests": "Digests",
+    "audiolog": "Audio Log",
+    "settings": "Settings",
+    "versions": "Versions"
+  },
+  "atelier": {
+    "state": {
+      "idle": "calm",
+      "thinking": "thinking",
+      "waiting": "waiting for quota"
+    },
+    "noKey": "no key",
+    "calls": "{{count}} calls",
+    "empty": "The map starts to appear once the first entry is processed.",
+    "thoughts": "Thoughts",
+    "noThoughts": "The AI will leave short thoughts here on every new entry.",
+    "noCompendium": "The compendium for this project forms as entries are processed.",
+    "manifesto": "Manifesto",
+    "startInterview": "Start the project interview",
+    "kind": {
+      "pattern": "pattern",
+      "imagine": "imagine",
+      "sequence": "sequence",
+      "connection": "link",
+      "contradiction": "tension",
+      "note": "note"
+    }
+  },
+  "question": {
+    "skip": "Skip",
+    "scrollHint": "scroll down",
+    "ownWords": "In my own words",
+    "writePlaceholder": "Write…",
+    "send": "Send",
+    "waiting_one": "a question is waiting",
+    "waiting_other": "{{count}} questions are waiting",
+    "kind": {
+      "followup": "follow-up",
+      "deepen": "go deeper",
+      "imagine": "imagine",
+      "sequence": "sequence",
+      "pattern": "pattern"
+    }
+  },
+  "interview": {
+    "later": "Later",
+    "thinking": "The AI is preparing a question…",
+    "composing": "Writing the manifesto and procedure…",
+    "procedure": "Working procedure",
+    "error": "The interview could not continue. Check your connection and API key."
+  },
+  "versions": {
+    "current": "Current version",
+    "built": "built"
   }
 }

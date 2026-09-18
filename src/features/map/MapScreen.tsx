@@ -62,28 +62,29 @@ export function MapScreen({ onOpenEntry }: Props) {
   const stylesheet = useMemo(() => {
     const text = cssVar('--color-text') || '#111';
     const muted = cssVar('--color-text-muted') || '#777';
-    const border = cssVar('--color-border') || '#ddd';
-    const surface = cssVar('--color-surface') || '#fff';
+    const faint = cssVar('--color-text-faint') || '#aaa';
+    const bg = cssVar('--color-bg') || '#fff';
     const warning = cssVar('--color-warning') || '#b8663f';
-    const fontFamily = cssVar('--font-sans') || 'sans-serif';
+    const fontFamily = cssVar('--font-mono') || 'monospace';
 
     return [
       {
         selector: 'node',
         style: {
-          'background-color': surface,
+          'background-color': bg,
           'border-width': 1,
-          'border-color': border,
+          'border-color': text,
           label: 'data(label)',
-          color: text,
+          color: faint,
           'font-family': fontFamily,
-          'font-size': 10,
-          'text-valign': 'center',
+          'font-size': 8,
+          'text-valign': 'bottom',
           'text-halign': 'center',
+          'text-margin-y': 6,
           'text-wrap': 'wrap',
-          'text-max-width': '80px',
-          width: 90,
-          height: 90,
+          'text-max-width': '84px',
+          width: 12,
+          height: 12,
           shape: 'ellipse',
         },
       },
@@ -92,7 +93,7 @@ export function MapScreen({ onOpenEntry }: Props) {
         style: {
           'line-style': 'solid',
           'line-color': muted,
-          width: 1.5,
+          width: 0.8,
           'curve-style': 'bezier',
           'target-arrow-shape': 'none',
         },
@@ -102,7 +103,7 @@ export function MapScreen({ onOpenEntry }: Props) {
         style: {
           'line-style': 'dashed',
           'line-color': warning,
-          width: 1.5,
+          width: 0.8,
           'curve-style': 'bezier',
           'target-arrow-shape': 'none',
         },
@@ -171,7 +172,7 @@ export function MapScreen({ onOpenEntry }: Props) {
             stylesheet={stylesheet as never}
             style={{ width: '100%', height: '100%' }}
             className={styles.canvas}
-            layout={{ name: 'cose', animate: false } as never}
+            layout={{ name: 'cose', animate: false, nodeDimensionsIncludeLabels: true, nodeRepulsion: () => 9000, idealEdgeLength: () => 70 } as never}
             cy={bindEvents}
           />
         )}

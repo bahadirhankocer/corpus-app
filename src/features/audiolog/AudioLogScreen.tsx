@@ -29,9 +29,6 @@ export function AudioLogScreen() {
   return (
     <div className={styles.screen}>
       <div className={styles.header}>
-        <span className={styles.itemTitle} style={{ fontSize: 16 }}>
-          {t('audiolog.title')}
-        </span>
         <button
           type="button"
           className={styles.generateButton}

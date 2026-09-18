@@ -2,12 +2,16 @@ import { classifyEntry } from './classify';
 import { generateFollowUp } from './followup';
 import { GeminiRateLimitError } from './gemini';
 import { findLinks } from './links';
+import { reflectOnEntry } from './reflect';
 import { getAudioBlob } from '../db/audio';
 import { db } from '../db/db';
 import { createFollowUp, hasPendingFollowUp } from '../db/followups';
+import { effectiveProjectId } from '../db/effective';
 import { createSuggestedLink } from '../db/links';
+import { addThoughts } from '../db/thoughts';
 import { ensureSettings } from '../db/settings';
 import type { Entry } from '../db/types';
+import { updateProject } from '../db/projects';
 
 const MIN_BACKOFF_MS = 2000;
 const MAX_BACKOFF_MS = 60000;
@@ -15,30 +19,94 @@ const LINK_CANDIDATE_LIMIT = 50;
 
 let running = false;
 
-async function maybeGenerateFollowUp(entry: Entry, apiKey: string, model: string): Promise<void> {
-  try {
-    if (await hasPendingFollowUp(entry.id)) return;
-    const result = await generateFollowUp(entry, apiKey, model);
-    await createFollowUp(entry.id, result.question, result.options);
-  } catch {
-    // best-effort enhancement; classification already succeeded, don't surface this failure
+const NEIGHBOR_LIMIT = 25;
+
+/** Rate-limit and network problems abort the chain so it is retried later; anything else is skipped. */
+function isRetryable(err: unknown): boolean {
+  return err instanceof GeminiRateLimitError || err instanceof TypeError || !navigator.onLine;
+}
+
+async function stepFollowUp(entry: Entry, apiKey: string, model: string): Promise<void> {
+  if (await hasPendingFollowUp(entry.id)) return;
+  const result = await generateFollowUp(entry, apiKey, model);
+  await createFollowUp(entry.id, result.question, result.options);
+}
+
+async function stepLinks(entry: Entry, projectId: string | undefined, apiKey: string, model: string): Promise<void> {
+  if (!projectId) return;
+  const candidates = (await db.entries.where('ai.projectId').equals(projectId).reverse().sortBy('createdAt'))
+    .filter((c) => c.id !== entry.id && c.ai.status === 'done')
+    .slice(0, LINK_CANDIDATE_LIMIT);
+  const suggestions = await findLinks(entry, candidates, apiKey, model);
+  for (const s of suggestions) {
+    await createSuggestedLink(entry.id, s.toId, s.kind, s.rationale);
   }
 }
 
-async function maybeFindLinks(entry: Entry, projectId: string | undefined, apiKey: string, model: string): Promise<void> {
-  if (!projectId) return;
-  try {
-    const candidates = (
-      await db.entries.where('ai.projectId').equals(projectId).reverse().sortBy('createdAt')
-    )
-      .filter((c) => c.id !== entry.id && c.ai.status === 'done')
-      .slice(0, LINK_CANDIDATE_LIMIT);
-    const suggestions = await findLinks(entry, candidates, apiKey, model);
-    for (const s of suggestions) {
-      await createSuggestedLink(entry.id, s.toId, s.kind, s.rationale);
+async function stepReflect(entry: Entry, projectId: string | undefined, styleGuide: string, apiKey: string, model: string): Promise<void> {
+  const project = projectId ? await db.projects.get(projectId) : undefined;
+  const pool = (await db.entries.where('ai.status').equals('done').reverse().sortBy('createdAt')).filter(
+    (e) => e.id !== entry.id && (projectId ? effectiveProjectId(e) === projectId : true),
+  );
+  const result = await reflectOnEntry({
+    entry,
+    project,
+    neighbors: pool.slice(0, NEIGHBOR_LIMIT),
+    styleGuide,
+    apiKey,
+    model,
+  });
+  await addThoughts(
+    result.thoughts.map((t) => ({ kind: t.kind, text: t.text, entryIds: t.relatedIds, projectId })),
+  );
+  if (project && result.compendium) {
+    await updateProject(project.id, { compendium: result.compendium, compendiumUpdatedAt: new Date().toISOString() });
+  }
+}
+
+async function enrichOne(): Promise<'done' | 'empty' | 'retry'> {
+  const settings = await ensureSettings();
+  if (!settings.aiEnabled || !settings.geminiApiKey || !navigator.onLine) return 'retry';
+
+  const entry = await db.entries
+    .where('ai.status')
+    .equals('done')
+    .filter((e) => e.ai.enriched === false)
+    .first();
+  if (!entry) return 'empty';
+
+  const { geminiApiKey: apiKey, model, styleGuide } = settings;
+  const projectId = effectiveProjectId(entry);
+  const steps: (() => Promise<void>)[] = [
+    () => stepFollowUp(entry, apiKey, model),
+    () => stepLinks(entry, projectId, apiKey, model),
+    () => stepReflect(entry, projectId, styleGuide, apiKey, model),
+  ];
+  for (const step of steps) {
+    try {
+      await step();
+    } catch (err) {
+      if (isRetryable(err)) return 'retry';
+      // any other failure only costs that one enhancement
     }
-  } catch {
-    // best-effort enhancement; classification already succeeded, don't surface this failure
+  }
+  await db.entries.update(entry.id, { 'ai.enriched': true });
+  return 'done';
+}
+
+let enriching = false;
+
+/** Follow-up, links and reflection for every processed entry, one entry at a time, in the background. */
+export async function kickEnrichment(): Promise<void> {
+  if (enriching) return;
+  enriching = true;
+  try {
+    for (;;) {
+      const outcome = await enrichOne();
+      if (outcome !== 'done') break;
+    }
+  } finally {
+    enriching = false;
   }
 }
 
@@ -70,15 +138,10 @@ async function processOne(): Promise<'processed' | 'empty' | 'skipped'> {
         'ai.summary': result.summary,
         'ai.processedAt': new Date().toISOString(),
         'ai.error': undefined,
+        'ai.enriched': false,
         'sync.dirty': true,
       });
-      const updatedEntry: Entry = {
-        ...entry,
-        transcript: result.transcript || entry.transcript,
-        ai: { ...entry.ai, categories: result.categories, tags: result.tags, summary: result.summary },
-      };
-      void maybeGenerateFollowUp(updatedEntry, settings.geminiApiKey, settings.model);
-      void maybeFindLinks(updatedEntry, result.projectId ?? undefined, settings.geminiApiKey, settings.model);
+      void kickEnrichment();
       return 'processed';
     } catch (err) {
       if (err instanceof GeminiRateLimitError) {
@@ -111,6 +174,7 @@ export async function kickAiQueue(): Promise<void> {
   } finally {
     running = false;
   }
+  void kickEnrichment();
 }
 
 export function retryEntry(id: string): Promise<void> {

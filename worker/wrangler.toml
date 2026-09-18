@@ -1,0 +1,14 @@
+name = "corpus-push"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+[vars]
+# Only this origin may call the Worker from a browser.
+ALLOWED_ORIGIN = "https://bahadirhankocer.github.io"
+
+[triggers]
+crons = ["*/10 * * * *"]
+
+[[kv_namespaces]]
+binding = "CORPUS_KV"
+id = "REPLACE_WITH_KV_NAMESPACE_ID"

@@ -1,10 +1,7 @@
 .notice {
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-surface-raised);
-  border-radius: var(--radius-sm);
-  font-size: 13px;
-  color: var(--color-text-muted);
-  line-height: 1.55;
+  font-size: 12px;
+  color: var(--color-text-faint);
+  line-height: 1.5;
 }
 
 .field {
@@ -14,16 +11,18 @@
 }
 
 .label {
-  font-size: 12px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--color-text-faint);
-  letter-spacing: -0.005em;
 }
 
 .input {
   padding: var(--space-3);
-  border: 1px solid var(--color-border);
+  border: none;
   border-radius: var(--radius-sm);
-  background: var(--color-surface);
+  background: var(--color-surface-raised);
   color: var(--color-text);
   font-family: var(--font-sans);
   font-size: 14px;
@@ -31,14 +30,32 @@
 
 .input:focus {
   outline: none;
-  border-color: var(--color-text-faint);
+  background: var(--color-accent-muted);
+}
+
+.keyValue {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-5);
+}
+
+.textButton {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  cursor: pointer;
 }
 
 .hint {
   font-size: 12px;
   color: var(--color-text-faint);
-}
-
-.link {
-  color: var(--color-text);
+  line-height: 1.5;
 }

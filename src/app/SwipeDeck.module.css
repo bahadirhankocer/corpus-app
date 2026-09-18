@@ -1,3 +1,12 @@
+.wrap {
+  --deck-p: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
 .deck {
   flex: 1;
   display: flex;
@@ -5,14 +14,16 @@
   overflow-x: auto;
   overflow-y: hidden;
   scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
 .deck::-webkit-scrollbar {
   display: none;
+}
+
+:global(:root[data-writing]) .deck {
+  overflow-x: hidden;
 }
 
 .panel {
@@ -20,6 +31,87 @@
   min-width: 0;
   min-height: 0;
   scroll-snap-align: start;
+  scroll-snap-stop: always;
   display: flex;
   flex-direction: column;
+  padding-bottom: 46px;
+  contain: layout paint;
+}
+
+.indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.indicator::before {
+  content: '';
+  position: absolute;
+  inset: -34px 0 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, transparent, var(--color-bg) 62%);
+}
+
+:global(:root[data-writing]) .indicator {
+  opacity: 0;
+}
+
+.track {
+  --step: 22px;
+  position: relative;
+  display: flex;
+  gap: 0;
+  pointer-events: auto;
+}
+
+.tick {
+  position: relative;
+  width: var(--step);
+  height: 22px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+.tick::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 3px;
+  height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  border-radius: 50%;
+  background: var(--color-text-faint);
+}
+
+.thumb {
+  position: absolute;
+  left: calc(var(--step) / 2 - 7px);
+  top: 50%;
+  width: 14px;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--color-text);
+  transform: translate3d(calc(var(--deck-p) * var(--step)), 0, 0);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
 }
