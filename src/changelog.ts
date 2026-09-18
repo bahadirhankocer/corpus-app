@@ -13,6 +13,15 @@ export interface ChangelogRelease {
 /** Newest first. Add a release here whenever `version` in package.json is bumped. */
 export const CHANGELOG: ChangelogRelease[] = [
   {
+    version: '0.2.1',
+    date: '2026-09-18',
+    title: { tr: 'Hizalama', en: 'Alignment' },
+    items: [
+      { tr: 'Ana ekranda halkalar ve "Text / Audio" yazıları artık aynı merkezde. 9:16 dahil tüm ekran oranlarında simetrik kalıyor.', en: 'On the home screen the rings and the "Text / Audio" words now share one centre and stay symmetric at every screen ratio, 9:16 included.' },
+      { tr: 'Yazı boyutu ekranın hem genişliğine hem yüksekliğine göre ölçekleniyor. Geniş ekranlarda içerik ortada bir sütunda duruyor.', en: 'Type scales with both the width and the height of the screen. On wide screens the content sits in a centred column.' },
+    ],
+  },
+  {
     version: '0.2.0',
     date: '2026-09-18',
     title: { tr: 'Atölye', en: 'The Atelier' },

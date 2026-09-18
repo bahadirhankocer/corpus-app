@@ -38,6 +38,12 @@
   contain: layout paint;
 }
 
+.panel > * {
+  width: 100%;
+  max-width: 620px;
+  margin-inline: auto;
+}
+
 .indicator {
   position: absolute;
   left: 0;

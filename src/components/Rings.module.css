@@ -2,7 +2,7 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(140vw, 760px);
+  width: min(96%, 72dvh, 620px);
   aspect-ratio: 1;
   transform: translate(-50%, -50%);
   color: var(--color-text);

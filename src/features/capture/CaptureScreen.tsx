@@ -135,17 +135,19 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
   if (mode === 'none') {
     return (
       <div className={styles.hero}>
-        <Rings />
         <div className={styles.topRow}>
           <AiDot onClick={onOpenAtelier} />
         </div>
-        <div className={styles.heroButtons}>
-          <button type="button" className={styles.heroButton} onClick={() => setMode('text')}>
-            {t('capture.writeButton')}
-          </button>
-          <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
-            {t('capture.recordButton')}
-          </button>
+        <div className={styles.stage}>
+          <Rings />
+          <div className={styles.heroButtons}>
+            <button type="button" className={styles.heroButton} onClick={() => setMode('text')}>
+              {t('capture.writeButton')}
+            </button>
+            <button type="button" className={styles.heroButton} onClick={handleStartVoice}>
+              {t('capture.recordButton')}
+            </button>
+          </div>
         </div>
         {waiting > 0 && !savedFlash && (
           <button type="button" className={styles.nudge} onClick={onOpenQuestion}>

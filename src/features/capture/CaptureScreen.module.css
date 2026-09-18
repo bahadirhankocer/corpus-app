@@ -17,19 +17,32 @@
 }
 
 .topRow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   display: flex;
   justify-content: center;
   padding-top: max(var(--space-4), env(safe-area-inset-top));
   z-index: 1;
 }
 
-.heroButtons {
+/* The rings and the two words share one centre, so the composition stays symmetric at any size. */
+.stage {
   flex: 1;
+  align-self: stretch;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroButtons {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
+  gap: 0;
   z-index: 1;
 }
 
@@ -37,14 +50,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--space-2) var(--space-5);
+  padding: 0 var(--space-5);
   border: none;
   background: none;
   color: var(--color-text);
   font-family: var(--font-display);
   font-weight: 300;
-  font-size: clamp(64px, 20vw, 92px);
-  line-height: 0.95;
+  font-size: clamp(52px, min(19vw, 10.5dvh), 96px);
+  line-height: 1;
   letter-spacing: -0.035em;
   cursor: pointer;
   transition:
