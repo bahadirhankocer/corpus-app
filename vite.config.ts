@@ -21,7 +21,7 @@ export default defineConfig({
       manifest: {
         name: 'Corpus',
         short_name: 'Corpus',
-        description: 'Kişisel, simbiyotik fikir defteri',
+        description: 'Corpus',
         lang: 'tr',
         start_url: '.',
         display: 'standalone',

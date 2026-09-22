@@ -2,13 +2,13 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuid } from 'uuid';
 
 import { db } from './db';
-import type { Link } from './types';
+import type { Link, LocalText } from './types';
 
 export async function createSuggestedLink(
   fromId: string,
   toId: string,
   kind: Link['kind'],
-  rationale: string,
+  rationale: LocalText,
 ): Promise<void> {
   const existing = await db.links
     .where('fromId')

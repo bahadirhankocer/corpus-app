@@ -6,6 +6,7 @@ import { createEntry } from '../../db/entries';
 import type { Entry } from '../../db/types';
 import { formatRelativeTime } from '../../utils/relativeTime';
 import styles from './Resurface.module.css';
+import { asLang, entryHeadline } from '../../i18n/localize';
 
 interface Props {
   entry: Entry;
@@ -16,7 +17,7 @@ export function Resurface({ entry, onDone }: Props) {
   const { t, i18n } = useTranslation();
   const [writing, setWriting] = useState(false);
   const [text, setText] = useState('');
-  const fragment = entry.title || entry.text || entry.transcript || entry.ai.summary || '';
+  const fragment = entryHeadline(entry, asLang(i18n.language));
 
   async function handleSave() {
     if (!text.trim()) return;

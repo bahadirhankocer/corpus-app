@@ -12,18 +12,56 @@
     "close": "Kapat"
   },
   "nav": {
-    "capture": "Yakala",
+    "corpus": "Corpus",
     "feed": "Akış",
-    "map": "Harita",
+    "map": "Harita"
+  },
+  "layer": {
+    "code": "Katman {{n}}",
     "sequence": "Sekans",
+    "links": "Bağlantılar",
     "digests": "Özetler",
-    "audiolog": "Log",
+    "audiolog": "Audio Log",
     "settings": "Ayarlar",
-    "atelier": "Atölye"
+    "versions": "Sürümler"
+  },
+  "aiState": {
+    "idle": "sakin",
+    "thinking": "düşünüyor",
+    "waiting": "kota bekliyor"
   },
   "offline": {
     "label": "çevrimdışı",
     "queued": "kuyrukta {{count}} girdi"
+  },
+  "corpus": {
+    "name": "Corpus",
+    "thinking": "yazılıyor",
+    "older": "Önceki sürüm",
+    "newer": "Sonraki sürüm",
+    "empty": "Corpus ilk girdilerinle yazılmaya başlar. Aşağıdaki halkaya dokun.",
+    "writing": "İlk metin yazılıyor. Birkaç dakika sürebilir.",
+    "noKey": "AI için anahtar gerekiyor. Ayarlar'dan ya da kurulum linkiyle bir kez gir.",
+    "writeNow": "Şimdi yaz",
+    "rewrite": "Yeniden yaz",
+    "bridge": "Neden bağladım",
+    "capture": "Yeni girdi"
+  },
+  "dossier": {
+    "title": "Dosya",
+    "refresh": "Yenile",
+    "empty": "Dosya, Corpus'un ilk sürümünden sonra hazırlanır.",
+    "candidate": "Video adayı",
+    "brief": "Brief",
+    "scenario": "Senaryo",
+    "themes": "Animasyon temaları",
+    "side": "Yan fikirler",
+    "sketch": "Eskiz",
+    "source": "Kaynak",
+    "regenerate": "Yeniden üret",
+    "sketching": "Eskiz yazılıyor",
+    "sketchFailed": "Eskiz yazılamadı. Bağlantını kontrol edip yeniden dene.",
+    "manifesto": "Manifesto"
   },
   "capture": {
     "writeButton": "Text",
@@ -37,13 +75,13 @@
     "importanceMid": "Orta",
     "importanceHigh": "Yüksek",
     "contextLabel": "Bağlam",
-    "saved": "Kaydedildi · işleniyor",
+    "saved": "Kaydedildi · Corpus'a işleniyor",
     "categoriesLabel": "Kategoriler",
     "projectLabel": "Proje",
     "tagsLabel": "Etiketler (virgülle ayır)"
   },
   "feed": {
-    "empty": "Henüz girdi yok. Yakala ekranından başla.",
+    "empty": "Henüz girdi yok. Corpus ekranındaki halkadan başla.",
     "kindVoice": "SES",
     "kindText": "YAZI",
     "voicePlaceholder": "(sesli not)",
@@ -62,11 +100,34 @@
     "aiSummary": "AI özeti",
     "aiError": "AI hatası",
     "retry": "Tekrar dene",
-    "linkedEntries": "Bağlı girdiler"
+    "linkedEntries": "Bu girdiye yazılanlar",
+    "thread": "Sorular ve cevapların",
+    "answerTo": "Bu soruya cevap",
+    "showOriginal": "orijinali göster",
+    "showTranslation": "çeviriyi göster"
   },
-  "followup": {
-    "nudge": "bir soru seni bekliyor",
-    "scrollHint": "aşağı kaydır"
+  "question": {
+    "skip": "Geç",
+    "scrollHint": "aşağı kaydır",
+    "ownWords": "Kendi cümlemle",
+    "writePlaceholder": "Yaz…",
+    "send": "Gönder",
+    "waiting_one": "bir soru seni bekliyor",
+    "waiting_other": "{{count}} soru seni bekliyor",
+    "kind": {
+      "followup": "devam sorusu",
+      "deepen": "derinleş",
+      "imagine": "hayal et",
+      "sequence": "sekans",
+      "pattern": "örüntü"
+    }
+  },
+  "interview": {
+    "later": "Sonra",
+    "thinking": "AI bir soru hazırlıyor…",
+    "composing": "Manifesto ve prosedür yazılıyor…",
+    "procedure": "Çalışma prosedürü",
+    "error": "Görüşme sürdürülemedi. Bağlantını ve API anahtarını kontrol et."
   },
   "resurface": {
     "skip": "Geç",
@@ -74,7 +135,8 @@
   },
   "map": {
     "noProjects": "Henüz proje yok",
-    "empty": "Bu projede işlenmiş girdi yok.",
+    "empty": "Harita ilk girdi işlendiğinde belirmeye başlar.",
+    "caption": "{{entries}} girdi · {{links}} bağ",
     "accept": "Kabul et",
     "reject": "Reddet"
   },
@@ -102,15 +164,14 @@
     "none": "Yok."
   },
   "digests": {
-    "empty": "Henüz özet yok. AI işleme açık olduğunda gün/hafta sonunda otomatik oluşur.",
+    "empty": "Henüz özet yok. Her hafta sonunda kendiliğinden yazılır.",
     "daily": "Günlük",
     "weekly": "Haftalık"
   },
   "audiolog": {
-    "title": "Audio Log",
-    "generate": "Bu haftanın log'unu hazırla",
+    "generate": "Log'u hazırla",
     "generating": "Hazırlanıyor…",
-    "empty": "Henüz Audio Log yok.",
+    "empty": "Henüz Audio Log yok. İlk log şimdiye kadar yazdığın her şeyi kapsar; sonrakiler bir öncekinin bittiği yerden başlar.",
     "status": {
       "draft": "taslak",
       "final": "final",
@@ -118,10 +179,9 @@
       "published": "yayınlandı"
     },
     "statusLabel": "Durum",
-    "paragraphs": "Paragraflar",
-    "sourceCount": "{{count}} kaynak",
-    "rewrite": "Yeniden yaz",
-    "improveGeneric": "stil kılavuzuna göre iyileştir",
+    "paragraphs": "Metin",
+    "sourceCount_one": "{{count}} kaynak",
+    "sourceCount_other": "{{count}} kaynak",
     "patreonIntro": "Patreon giriş metni",
     "exportMd": "MD indir",
     "exportTxt": "TXT indir",
@@ -135,6 +195,17 @@
     "scene": "Sahne / sekans",
     "motion": "Animasyon / hareket"
   },
+  "categoryCode": {
+    "theme": "TMA",
+    "sound": "SES",
+    "voiceover": "VO",
+    "scene": "SHN",
+    "motion": "ANM"
+  },
+  "versions": {
+    "current": "Şu anki sürüm",
+    "built": "derlendi"
+  },
   "settings": {
     "language": "Dil",
     "theme": "Tema",
@@ -143,19 +214,36 @@
     "themeDark": "Koyu",
     "ai": {
       "title": "Yapay zeka",
-      "privacyNotice": "Gizlilik: Gemini ücretsiz katmanında gönderilen içerik Google tarafından ürün geliştirme için kullanılabilir. Yayınlanmamış fikirler için bunu göz önünde bulundur. API anahtarı yalnızca bu cihazda saklanır, hiçbir yere gönderilmez.",
+      "privacyNotice": "Gizlilik: Gemini ücretsiz katmanında gönderilen içerik Google tarafından ürün geliştirme için kullanılabilir. Yayınlanmamış fikirler için bunu göz önünde bulundur. API anahtarı yalnızca bu cihazda saklanır.",
       "apiKeyLabel": "Gemini API anahtarı",
-      "apiKeyHint": "Yalnızca bu cihazda saklanır.",
       "apiKeySaved": "Kayıtlı. Yalnızca bu cihazda saklanır.",
-      "modelLabel": "Model adı",
-      "enabledLabel": "AI işleme",
-      "on": "Açık",
-      "off": "Kapalı",
+      "setupHint": "Anahtarı bir kez yapıştır, bir daha sorulmaz. Başka cihaz için kurulum linki oluşturabilirsin.",
+      "setupDone": "Anahtar kaydedildi",
       "change": "Anahtarı değiştir",
       "copyLink": "Kurulum linkini kopyala",
       "copied": "Kopyalandı",
-      "setupHint": "Anahtarı bir kez yapıştır, bir daha sorulmaz. Başka cihaz için kurulum linki oluşturabilirsin.",
-      "setupDone": "Anahtar kaydedildi"
+      "modelLabel": "Model adı",
+      "enabledLabel": "AI işleme",
+      "on": "Açık",
+      "off": "Kapalı"
+    },
+    "prompts": {
+      "title": "Bildirimler",
+      "listen": "Günde \"seni dinledim\" bildirimi",
+      "questions": "Günde soru bildirimi",
+      "morning": "Sabah çekirdeği",
+      "from": "Başlangıç saati",
+      "to": "Bitiş saati",
+      "test": "Deneme bildirimi gönder",
+      "testSent": "Gönderildi. Birkaç saniye içinde gelmeli.",
+      "push": {
+        "label": "Bildirimler",
+        "hint": "Bildirimler bu saatler arasında, rastgele anlarda gelir. İçerikleri telefonunda seçilir.",
+        "unsupported": "Bu tarayıcıda bildirim desteklenmiyor. Uygulamayı ana ekrana ekleyip oradan aç.",
+        "no-worker": "Bildirim sunucusu henüz kurulmadı.",
+        "denied": "Bildirim izni verilmedi. Telefonun ayarlarından izin verebilirsin.",
+        "error": "Bildirim sunucusuna ulaşılamadı."
+      }
     },
     "projects": {
       "title": "Projeler",
@@ -173,79 +261,6 @@
     "audioLogTargetMinutes": "Hedef süre (dk)",
     "audioLogWpm": "Dakikadaki kelime",
     "audioLogLang": "Audio Log dili",
-    "audioLogCues": "Yapım işaretleri",
-    "prompts": {
-      "title": "AI soruları",
-      "perDay": "Günde kaç soru",
-      "from": "Başlangıç saati",
-      "to": "Bitiş saati",
-      "push": {
-        "label": "Bildirim",
-        "hint": "Sorular rastgele saatlerde bildirimle gelir.",
-        "unsupported": "Bu tarayıcıda bildirim desteklenmiyor. Uygulamayı ana ekrana ekleyip yeniden dene.",
-        "no-worker": "Bildirim sunucusu (Cloudflare Worker) henüz kurulmadı. Kurulum adımları worker/README.md içinde.",
-        "denied": "Bildirim izni verilmedi.",
-        "error": "Bildirim açılamadı. Sunucuya ulaşılamadı."
-      }
-    }
-  },
-  "layer": {
-    "code": "Katman {{n}}",
-    "map": "Harita",
-    "sequence": "Sekans",
-    "digests": "Özetler",
-    "audiolog": "Audio Log",
-    "settings": "Ayarlar",
-    "versions": "Sürümler"
-  },
-  "atelier": {
-    "state": {
-      "idle": "sakin",
-      "thinking": "düşünüyor",
-      "waiting": "kota bekliyor"
-    },
-    "noKey": "anahtar yok",
-    "calls": "{{count}} çağrı",
-    "empty": "Harita ilk girdi işlendiğinde belirmeye başlar.",
-    "thoughts": "Düşünceler",
-    "noThoughts": "AI her yeni girdide burada kısa düşünceler bırakacak.",
-    "noCompendium": "Bu proje için derleme, ilk girdiler işlendikçe oluşacak.",
-    "manifesto": "Manifesto",
-    "startInterview": "Proje görüşmesini başlat",
-    "kind": {
-      "pattern": "örüntü",
-      "imagine": "hayal",
-      "sequence": "sekans",
-      "connection": "bağ",
-      "contradiction": "çelişki",
-      "note": "not"
-    }
-  },
-  "question": {
-    "skip": "Geç",
-    "scrollHint": "aşağı kaydır",
-    "ownWords": "Kendi cümlemle",
-    "writePlaceholder": "Yaz…",
-    "send": "Gönder",
-    "waiting_one": "bir soru seni bekliyor",
-    "waiting_other": "{{count}} soru seni bekliyor",
-    "kind": {
-      "followup": "devam sorusu",
-      "deepen": "derinleş",
-      "imagine": "hayal et",
-      "sequence": "sekans",
-      "pattern": "örüntü"
-    }
-  },
-  "interview": {
-    "later": "Sonra",
-    "thinking": "AI bir soru hazırlıyor…",
-    "composing": "Manifesto ve prosedür yazılıyor…",
-    "procedure": "Çalışma prosedürü",
-    "error": "Görüşme sürdürülemedi. Bağlantını ve API anahtarını kontrol et."
-  },
-  "versions": {
-    "current": "Şu anki sürüm",
-    "built": "derlendi"
+    "audioLogCues": "Yapım işaretleri"
   }
 }

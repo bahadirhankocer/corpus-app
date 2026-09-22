@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { kickAiQueue } from '../../ai/queue';
-import { AiDot } from '../../components/AiDot';
 import { Rings } from '../../components/Rings';
 import { TextChoice } from '../../components/TextChoice';
 import { saveAudioBlob } from '../../db/audio';
 import { createEntry } from '../../db/entries';
-import { useQuestions } from '../../db/questions';
+import { useBackHandler } from '../../app/backStack';
 import type { Entry } from '../../db/types';
 import styles from './CaptureScreen.module.css';
 import { type RecordedAudio, useAudioRecorder } from './useAudioRecorder';
@@ -21,11 +20,12 @@ function formatTimer(sec: number): string {
 }
 
 interface Props {
-  onOpenQuestion: () => void;
-  onOpenAtelier: () => void;
+  onClose: () => void;
+  onSaved: () => void;
 }
 
-export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
+/** Full-screen capture, opened from the ring on the Corpus screen. */
+export function CaptureScreen({ onClose, onSaved }: Props) {
   const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>('none');
   const [text, setText] = useState('');
@@ -34,12 +34,9 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
   const [context, setContext] = useState('');
   const [recorded, setRecorded] = useState<RecordedAudio | null>(null);
   const [elapsed, setElapsed] = useState(0);
-  const [savedFlash, setSavedFlash] = useState(false);
   const recorder = useAudioRecorder();
   const audioUrlRef = useRef<string | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const questions = useQuestions();
-  const waiting = questions?.length ?? 0;
 
   useEffect(() => {
     if (recorder.state !== 'recording') {
@@ -56,15 +53,6 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
       if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current);
     };
   }, []);
-
-  // While writing or recording the deck must not react to horizontal drags.
-  useEffect(() => {
-    if (mode === 'none') delete document.documentElement.dataset.writing;
-    else document.documentElement.dataset.writing = '';
-    return () => {
-      delete document.documentElement.dataset.writing;
-    };
-  }, [mode]);
 
   function reset() {
     setMode('none');
@@ -122,9 +110,8 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
       context: context.trim() || undefined,
     });
     reset();
-    setSavedFlash(true);
-    window.setTimeout(() => setSavedFlash(false), 2000);
     void kickAiQueue();
+    onSaved();
   }
 
   function handleCancel() {
@@ -132,11 +119,19 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
     reset();
   }
 
+  // Back while writing keeps what was written, like closing a note; with nothing written it steps back.
+  useBackHandler(mode !== 'none', () => {
+    if (canSave && recorder.state !== 'recording') void handleSave();
+    else handleCancel();
+  });
+
   if (mode === 'none') {
     return (
-      <div className={styles.hero}>
+      <div className={`${styles.overlay} ${styles.hero}`}>
         <div className={styles.topRow}>
-          <AiDot onClick={onOpenAtelier} />
+          <button type="button" className={styles.cancelButton} onClick={onClose}>
+            {t('common.close')}
+          </button>
         </div>
         <div className={styles.stage}>
           <Rings />
@@ -149,18 +144,12 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
             </button>
           </div>
         </div>
-        {waiting > 0 && !savedFlash && (
-          <button type="button" className={styles.nudge} onClick={onOpenQuestion}>
-            {t('question.waiting', { count: waiting })}
-          </button>
-        )}
-        {savedFlash && <div className={styles.heroStatus}>{t('capture.saved')}</div>}
       </div>
     );
   }
 
   return (
-    <div className={styles.screen}>
+    <div className={`${styles.overlay} ${styles.screen}`}>
       <div className={styles.header}>
         <button type="button" className={styles.cancelButton} onClick={handleCancel}>
           {t('common.cancel')}
@@ -232,7 +221,6 @@ export function CaptureScreen({ onOpenQuestion, onOpenAtelier }: Props) {
         />
       </div>
 
-      {savedFlash && <div className={styles.status}>{t('capture.saved')}</div>}
     </div>
   );
 }

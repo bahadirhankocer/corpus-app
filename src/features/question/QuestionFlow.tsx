@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { kickAiQueue } from '../../ai/queue';
 import { answerQuestion, dismissQuestion, useQuestions } from '../../db/questions';
 import styles from './QuestionFlow.module.css';
+import { asLang } from '../../i18n/localize';
 
 interface Props {
   onClose: () => void;
@@ -15,8 +16,8 @@ interface Props {
  * proactive questions share this flow.
  */
 export function QuestionFlow({ onClose }: Props) {
-  const { t } = useTranslation();
-  const questions = useQuestions();
+  const { t, i18n } = useTranslation();
+  const questions = useQuestions(asLang(i18n.language));
   const question = questions?.[0];
   const scrollerRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);

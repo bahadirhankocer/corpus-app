@@ -5,6 +5,7 @@ import { createProject, deleteProject, updateProject, useProjects } from '../../
 import { updateSettings } from '../../db/settings';
 import type { Project, Settings } from '../../db/types';
 import styles from './ProjectsSection.module.css';
+import { asLang, loc } from '../../i18n/localize';
 import sectionStyles from './SettingsScreen.module.css';
 
 interface FormValues {
@@ -71,7 +72,7 @@ interface Props {
 }
 
 export function ProjectsSection({ settings, onStartInterview }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const projects = useProjects();
   const [adding, setAdding] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -156,7 +157,7 @@ export function ProjectsSection({ settings, onStartInterview }: Props) {
                 </div>
               </div>
               {project.description && <span className={styles.desc}>{project.description}</span>}
-              {project.manifesto && <span className={styles.desc}>{project.manifesto}</span>}
+              {project.manifesto && <span className={styles.desc}>{loc(project.manifesto, asLang(i18n.language))}</span>}
               {settings.aiEnabled && settings.geminiApiKey && (
                 <button type="button" className={styles.linkButton} onClick={() => onStartInterview(project.id)}>
                   {project.manifesto ? t('settings.projects.redoInterview') : t('settings.projects.interview')}

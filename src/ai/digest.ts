@@ -1,12 +1,13 @@
+import { BILINGUAL, STR, bi } from './context';
 import { callGemini } from './gemini';
 import { SYSTEM_INSTRUCTION } from './prompts';
 import { effectiveCategories } from '../db/effective';
-import type { Entry, Project } from '../db/types';
+import type { Bi, Entry, Project } from '../db/types';
 
 const DIGEST_SCHEMA = {
   type: 'OBJECT',
   properties: {
-    body: { type: 'STRING' },
+    body: bi(STR),
   },
   required: ['body'],
 };
@@ -15,10 +16,9 @@ export async function generateDigest(
   entries: Entry[],
   projects: Project[],
   kind: 'daily' | 'weekly',
-  lang: 'tr' | 'en',
   apiKey: string,
   model: string,
-): Promise<string> {
+): Promise<Bi> {
   const projectName = (id: string | undefined) => projects.find((p) => p.id === id)?.name;
   const block = entries
     .map(
@@ -28,7 +28,7 @@ export async function generateDigest(
     .join('\n');
 
   const period = kind === 'daily' ? 'dün' : 'bu hafta';
-  const instructions = `Aşağıda ${period} girilen fikir defteri girdileri var. Bir gözlem özeti yaz:
+  const instructions = `Aşağıda ${period} girilen fikir girdileri var. Bir gözlem özeti yaz:
 - Tekrar eden motifler/temalar varsa belirt.
 - Açık çelişkiler (birbirine ters düşen fikirler) varsa belirt.
 - Proje bazında girdi dağılımından kısaca bahset.
@@ -36,12 +36,12 @@ export async function generateDigest(
 Kurallar:
 - Sadece gözlemle, hiçbir öneri veya yeni fikir sunma.
 - Kısa, düz, 3-5 cümlelik bir paragraf olsun.
-- ${lang === 'tr' ? 'Türkçe yaz.' : 'Write in English.'}
+- ${BILINGUAL}
 
 Girdiler:
 ${block}`;
 
-  const result = await callGemini<{ body: string }>({
+  const result = await callGemini<{ body: Bi }>({
     apiKey,
     model,
     systemInstruction: SYSTEM_INSTRUCTION,

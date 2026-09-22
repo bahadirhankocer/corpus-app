@@ -1,0 +1,199 @@
+import type { Core, EdgeSingular, NodeSingular } from 'cytoscape';
+import { useEffect, useMemo, useState } from 'react';
+import CytoscapeComponent from 'react-cytoscapejs';
+import { useTranslation } from 'react-i18next';
+
+import { CategoryChips } from '../../components/CategoryChips';
+import { effectiveCategories } from '../../db/effective';
+import { useEntriesForProject } from '../../db/entries';
+import { setLinkState, useLinksForEntries } from '../../db/links';
+import { useProjects } from '../../db/projects';
+import { useSettings } from '../../db/settings';
+import type { Category, Link } from '../../db/types';
+import styles from './LinksScreen.module.css';
+import { asLang, entryHeadline, loc } from '../../i18n/localize';
+
+interface Props {
+  onOpenEntry: (id: string) => void;
+}
+
+function cssVar(name: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+export function LinksScreen({ onOpenEntry }: Props) {
+  const { t, i18n } = useTranslation();
+  const projects = useProjects();
+  const settings = useSettings();
+  const [projectId, setProjectId] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<Category[]>([]);
+  const [selectedLink, setSelectedLink] = useState<Link | null>(null);
+
+  useEffect(() => {
+    if (projectId || !projects || projects.length === 0) return;
+    setProjectId(settings?.activeProjectId && projects.some((p) => p.id === settings.activeProjectId)
+      ? settings.activeProjectId
+      : projects[0].id);
+  }, [projects, settings, projectId]);
+
+  const entries = useEntriesForProject(projectId || undefined);
+  const filteredEntries = useMemo(
+    () =>
+      categoryFilter.length === 0
+        ? entries
+        : entries?.filter((e) => effectiveCategories(e).some((c) => categoryFilter.includes(c))),
+    [entries, categoryFilter],
+  );
+  const entryIds = useMemo(() => filteredEntries?.map((e) => e.id) ?? [], [filteredEntries]);
+  const links = useLinksForEntries(entryIds);
+
+  const elements = useMemo(() => {
+    const nodes = (filteredEntries ?? []).map((e) => ({
+      data: {
+        id: e.id,
+        label: entryHeadline(e, asLang(i18n.language)).slice(0, 40),
+      },
+    }));
+    const edges = (links ?? []).map((l) => ({
+      data: { id: l.id, source: l.fromId, target: l.toId, kind: l.kind, state: l.state },
+    }));
+    return [...nodes, ...edges];
+  }, [filteredEntries, links, i18n.language]);
+
+  const stylesheet = useMemo(() => {
+    const text = cssVar('--color-text') || '#111';
+    const muted = cssVar('--color-text-muted') || '#777';
+    const faint = cssVar('--color-text-faint') || '#aaa';
+    const bg = cssVar('--color-bg') || '#fff';
+    const warning = cssVar('--color-warning') || '#b8663f';
+    const fontFamily = cssVar('--font-mono') || 'monospace';
+
+    return [
+      {
+        selector: 'node',
+        style: {
+          'background-color': bg,
+          'border-width': 1,
+          'border-color': text,
+          label: 'data(label)',
+          color: faint,
+          'font-family': fontFamily,
+          'font-size': 8,
+          'text-valign': 'bottom',
+          'text-halign': 'center',
+          'text-margin-y': 6,
+          'text-wrap': 'wrap',
+          'text-max-width': '84px',
+          width: 12,
+          height: 12,
+          shape: 'ellipse',
+        },
+      },
+      {
+        selector: 'edge[kind = "connection"]',
+        style: {
+          'line-style': 'solid',
+          'line-color': muted,
+          width: 0.8,
+          'curve-style': 'bezier',
+          'target-arrow-shape': 'none',
+        },
+      },
+      {
+        selector: 'edge[kind = "contradiction"]',
+        style: {
+          'line-style': 'dashed',
+          'line-color': warning,
+          width: 0.8,
+          'curve-style': 'bezier',
+          'target-arrow-shape': 'none',
+        },
+      },
+      {
+        selector: 'edge[state = "suggested"]',
+        style: { opacity: 0.4 },
+      },
+      {
+        selector: 'edge[state = "accepted"]',
+        style: { opacity: 1 },
+      },
+    ];
+  }, [settings?.theme]);
+
+  function bindEvents(cy: Core) {
+    cy.removeAllListeners();
+    cy.on('tap', 'node', (evt) => {
+      const node = evt.target as NodeSingular;
+      onOpenEntry(node.id());
+    });
+    cy.on('tap', 'edge', (evt) => {
+      const edge = evt.target as EdgeSingular;
+      const link = (links ?? []).find((l) => l.id === edge.id());
+      if (link) setSelectedLink(link);
+    });
+  }
+
+  async function handleAccept() {
+    if (!selectedLink) return;
+    await setLinkState(selectedLink.id, 'accepted');
+    setSelectedLink(null);
+  }
+
+  async function handleDismiss() {
+    if (!selectedLink) return;
+    await setLinkState(selectedLink.id, 'dismissed');
+    setSelectedLink(null);
+  }
+
+  return (
+    <div className={styles.screen}>
+      <div className={styles.controls}>
+        {projects && projects.length > 0 ? (
+          <select className={styles.select} value={projectId} onChange={(e) => setProjectId(e.target.value)}>
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className={styles.select}>{t('map.noProjects')}</span>
+        )}
+        <CategoryChips value={categoryFilter} onChange={setCategoryFilter} />
+      </div>
+
+      <div className={styles.wrapper}>
+        {filteredEntries && filteredEntries.length === 0 && (
+          <div className={styles.empty}>{t('map.empty')}</div>
+        )}
+        {filteredEntries && filteredEntries.length > 0 && (
+          <CytoscapeComponent
+            key={settings?.theme}
+            elements={elements}
+            stylesheet={stylesheet as never}
+            style={{ width: '100%', height: '100%' }}
+            className={styles.canvas}
+            layout={{ name: 'cose', animate: false, nodeDimensionsIncludeLabels: true, nodeRepulsion: () => 9000, idealEdgeLength: () => 70 } as never}
+            cy={bindEvents}
+          />
+        )}
+
+        {selectedLink && (
+          <div className={styles.rationalePanel}>
+            <p className={styles.rationaleText}>{loc(selectedLink.rationale, asLang(i18n.language))}</p>
+            <div className={styles.rationaleActions}>
+              <button type="button" className={styles.dismissButton} onClick={handleDismiss}>
+                {t('map.reject')}
+              </button>
+              {selectedLink.state === 'suggested' && (
+                <button type="button" className={styles.acceptButton} onClick={handleAccept}>
+                  {t('map.accept')}
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { SegmentedControl } from '../../components/SegmentedControl';
 import { updateSettings } from '../../db/settings';
 import type { Settings } from '../../db/types';
-import { disablePush, enablePush, pushSupported, syncPush, workerUrlFor } from '../push/push';
+import { disablePush, enablePush, pushSupported, sendTestPush, syncPush, workerUrlFor } from '../push/push';
 import styles from './AudioLogSection.module.css';
 import sectionStyles from './SettingsScreen.module.css';
 
@@ -15,12 +15,21 @@ interface Props {
 export function PromptsSection({ settings }: Props) {
   const { t } = useTranslation();
   const [message, setMessage] = useState<string | null>(null);
-  const { perDay, startHour, endHour } = settings.prompts;
+  const { startHour, endHour } = settings.prompts;
+  const { listen, questions, morning } = settings.notify;
   const supported = pushSupported();
   const hasWorker = Boolean(workerUrlFor(settings));
 
   async function patchPrompts(patch: Partial<Settings['prompts']>) {
     await updateSettings({ prompts: { ...settings.prompts, ...patch } });
+    void syncPush();
+  }
+
+  async function patchNotify(patch: Partial<Settings['notify']>) {
+    const notify = { ...settings.notify, ...patch };
+    // Questions reaching the phone need at least as many questions written in the app.
+    const perDay = Math.max(settings.prompts.perDay, notify.questions, 1) as Settings['prompts']['perDay'];
+    await updateSettings({ notify, prompts: { ...settings.prompts, perDay } });
     void syncPush();
   }
 
@@ -34,20 +43,67 @@ export function PromptsSection({ settings }: Props) {
     setMessage(result === 'ok' ? null : t(`settings.prompts.push.${result}`));
   }
 
+  async function handleTest() {
+    setMessage(null);
+    setMessage((await sendTestPush()) ? t('settings.prompts.testSent') : t('settings.prompts.push.error'));
+  }
+
   return (
     <div className={sectionStyles.section}>
       <span className={sectionStyles.sectionTitle}>{t('settings.prompts.title')}</span>
 
       <div className={styles.field}>
-        <span className={styles.label}>{t('settings.prompts.perDay')}</span>
+        <span className={styles.label}>{t('settings.prompts.push.label')}</span>
         <SegmentedControl
           options={[
-            { value: 1, label: '1' },
-            { value: 2, label: '2' },
-            { value: 3, label: '3' },
+            { value: 'off', label: t('settings.ai.off') },
+            { value: 'on', label: t('settings.ai.on') },
           ]}
-          value={perDay}
-          onChange={(v) => patchPrompts({ perDay: v as Settings['prompts']['perDay'] })}
+          value={settings.pushSubscribed ? 'on' : 'off'}
+          onChange={handlePush}
+        />
+        <span className={sectionStyles.hint}>
+          {message ??
+            (!supported
+              ? t('settings.prompts.push.unsupported')
+              : !hasWorker
+                ? t('settings.prompts.push.no-worker')
+                : t('settings.prompts.push.hint'))}
+        </span>
+        {settings.pushSubscribed && (
+          <button type="button" className={sectionStyles.textButton} onClick={handleTest}>
+            {t('settings.prompts.test')}
+          </button>
+        )}
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.label}>{t('settings.prompts.listen')}</span>
+        <SegmentedControl
+          options={[0, 1, 2, 3].map((n) => ({ value: n, label: String(n) }))}
+          value={listen}
+          onChange={(v) => patchNotify({ listen: v })}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.label}>{t('settings.prompts.questions')}</span>
+        <SegmentedControl
+          options={[0, 1, 2].map((n) => ({ value: n, label: String(n) }))}
+          value={questions}
+          onChange={(v) => patchNotify({ questions: v })}
+        />
+      </div>
+
+      <div className={styles.field}>
+        <span className={styles.label}>{t('settings.prompts.morning')}</span>
+        <SegmentedControl
+          options={[
+            { value: 'off', label: t('settings.ai.off') },
+            { value: 'on', label: t('settings.ai.on') },
+          ]}
+          value={morning ? 'on' : 'off'}
+          onChange={(v) => patchNotify({ morning: v === 'on' })}
         />
       </div>
 
@@ -74,26 +130,6 @@ export function PromptsSection({ settings }: Props) {
             onBlur={(e) => patchPrompts({ endHour: Math.min(24, Math.max(1, Number(e.target.value) || 22)) })}
           />
         </div>
-      </div>
-
-      <div className={styles.field}>
-        <span className={styles.label}>{t('settings.prompts.push.label')}</span>
-        <SegmentedControl
-          options={[
-            { value: 'off', label: t('settings.ai.off') },
-            { value: 'on', label: t('settings.ai.on') },
-          ]}
-          value={settings.pushSubscribed ? 'on' : 'off'}
-          onChange={handlePush}
-        />
-        <span className={sectionStyles.hint}>
-          {message ??
-            (!supported
-              ? t('settings.prompts.push.unsupported')
-              : !hasWorker
-                ? t('settings.prompts.push.no-worker')
-                : t('settings.prompts.push.hint'))}
-        </span>
       </div>
     </div>
   );

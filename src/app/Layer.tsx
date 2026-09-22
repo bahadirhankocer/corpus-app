@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useBackHandler } from './backStack';
 import styles from './Layer.module.css';
 
 interface Props {
@@ -13,7 +14,7 @@ interface Props {
 
 const EXIT_MS = 240;
 
-/** A full-screen layer that opens from the Atelier and slides away when closed. */
+/** A full-screen layer that slides away when closed, by its button or by the back gesture. */
 export function Layer({ code, title, onClose, children }: Props) {
   const { t } = useTranslation();
   const [closing, setClosing] = useState(false);
@@ -23,6 +24,8 @@ export function Layer({ code, title, onClose, children }: Props) {
     setClosing(true);
     window.setTimeout(onClose, EXIT_MS);
   }
+
+  useBackHandler(!closing, handleClose);
 
   return (
     <div className={styles.layer} data-closing={closing}>

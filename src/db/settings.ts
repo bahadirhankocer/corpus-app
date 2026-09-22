@@ -10,9 +10,12 @@ export async function ensureSettings(): Promise<Settings> {
     return DEFAULT_SETTINGS;
   }
   // Fields added by later versions are filled in from the defaults.
-  if (!existing.prompts) {
-    existing.prompts = DEFAULT_SETTINGS.prompts;
-    await db.settings.update('app', { prompts: existing.prompts });
+  const patch: Partial<Settings> = {};
+  if (!existing.prompts) patch.prompts = DEFAULT_SETTINGS.prompts;
+  if (!existing.notify) patch.notify = DEFAULT_SETTINGS.notify;
+  if (Object.keys(patch).length > 0) {
+    await db.settings.update('app', patch);
+    return { ...existing, ...patch };
   }
   return existing;
 }

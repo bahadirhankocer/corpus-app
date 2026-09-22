@@ -1,26 +1,36 @@
 # Corpus
 
-A personal, symbiotic idea notebook. PWA — capture on Android, review and edit on Windows. See [docs/spec.md](./docs/spec.md) for the full spec (in Turkish; the product's primary user is Turkish-speaking).
+A notebook that turns scattered, spontaneous thoughts into one linear body of work. Write whenever an idea arrives; Corpus reads everything together, keeps a single self-revising text of what has been thought so far, and prepares the material for the next video essay: a candidate, a brief, a scenario, animation themes with runnable HTML sketches, and side ideas.
 
-The app is a PWA, not a preview: install it from the browser ("Add to Home Screen" / "Install app") and it runs standalone and offline. An APK is optional and not required for anything except exact-time native notifications.
+It is a PWA: install it from the browser ("Add to Home Screen" / "Install app") and it runs standalone and offline. The original spec (in Turkish) is in [docs/spec.md](./docs/spec.md).
 
 ## Screens
 
-Swipe between three stops: **Capture**, **Feed**, **Atelier**. The Atelier is the AI's workspace (living map, stream of thoughts, project compendiums) and opens every other layer: Map, Sequence, Digests, Audio Log, Settings and Versions.
+Swipe between three stops:
+
+- **Corpus**: the living text, with bridge terms that explain why ideas were connected, and the production file below it. The ring at the bottom opens capture.
+- **Feed**: every entry, with the questions the AI asked about it and your answers.
+- **Map**: the whole corpus as a constellation.
+
+Sequence, Connections, Digests, Audio Log, Settings and Versions open as layers. The back gesture always returns to the previous screen.
+
+## Languages
+
+Everything the AI writes is stored in Turkish and English, and entries are translated, so switching the language changes the whole app at once. The original of a translated entry is one tap away.
 
 ## Gemini API key
 
-The key is never committed or built into the app. Enter it once on each device, either in Settings → AI, or by opening a one-time setup link:
+The key is never committed or built into the app. Enter it once per device, in Settings → AI or by opening a one-time setup link:
 
 ```
-https://bahadirhankocer.github.io/corpus-app/#k=<gemini key>
+https://bahadirhankocer.github.io/corpus/#k=<gemini key>
 ```
 
 The part after `#` is never sent to any server. The app stores the key in IndexedDB on the device and removes it from the address bar immediately. Settings → AI can copy a ready-made setup link for another device.
 
-## Push notifications (optional)
+## Notifications
 
-Random-hour questions from the AI arrive as notifications through a small Cloudflare Worker. See [worker/README.md](./worker/README.md). Without it, questions still appear whenever the app is open.
+A small Cloudflare Worker wakes the phone at random hours; the phone decides what to show from notes it prepared itself, so no entry leaves the device. See [worker/README.md](./worker/README.md).
 
 ## Development
 
@@ -29,7 +39,7 @@ npm install
 npm run dev
 ```
 
-To test the production build's offline/PWA behavior locally:
+To test the production build's offline and PWA behaviour locally:
 
 ```bash
 npm run build
@@ -44,7 +54,7 @@ The in-app Versions layer reads `src/changelog.ts`. Bump `version` in `package.j
 
 ## Stack
 
-Vite + React + TypeScript · `vite-plugin-pwa` (offline, manifest, push handler) · Dexie (IndexedDB) · i18next (TR/EN) · Google Gemini (REST) · `@dnd-kit` (sequencing) · `cytoscape` (connection map).
+Vite + React + TypeScript · `vite-plugin-pwa` (offline, manifest, push handler) · Dexie (IndexedDB) · i18next (TR/EN) · Google Gemini (REST) · `@dnd-kit` (sequencing) · `cytoscape` (connections).
 
 ## Deployment
 

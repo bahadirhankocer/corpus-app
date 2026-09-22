@@ -1,12 +1,13 @@
 import { useTranslation } from 'react-i18next';
 
-import { CATEGORY_CODES } from '../../constants/categories';
+import { categoryCode } from '../../constants/categories';
 import { effectiveCategories, effectiveProjectId } from '../../db/effective';
 import { useEntries } from '../../db/entries';
 import { useProjects } from '../../db/projects';
 import type { Entry, Project } from '../../db/types';
 import { formatDateTime } from '../../utils/format';
 import styles from './FeedScreen.module.css';
+import { asLang, entryView } from '../../i18n/localize';
 
 interface Props {
   onOpenEntry: (id: string) => void;
@@ -24,15 +25,17 @@ function EntryCard({
   projects: Project[] | undefined;
 }) {
   const { t, i18n } = useTranslation();
-  const preview = entry.title || entry.text || entry.transcript || t('feed.voicePlaceholder');
+  const view = entryView(entry, asLang(i18n.language));
+  const preview = view.title || view.text || t('feed.voicePlaceholder');
   const categories = effectiveCategories(entry);
   const projectId = effectiveProjectId(entry);
   const project = projects?.find((p) => p.id === projectId);
 
   const metaParts = [
     entry.kind === 'voice' ? t('feed.kindVoice') : t('feed.kindText'),
-    categories.map((c) => CATEGORY_CODES[c]).join(' '),
+    categories.map((c) => categoryCode(c)).join(' '),
     project?.name ?? entry.context,
+    view.thread.length > 0 ? `↳ ${view.thread.length}` : '',
     entry.ai.status === 'done' ? '' : t(`feed.aiStatus.${entry.ai.status}`),
     formatDateTime(entry.createdAt, i18n.language),
   ].filter(Boolean);

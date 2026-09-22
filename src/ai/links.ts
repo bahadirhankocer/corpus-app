@@ -1,11 +1,13 @@
+import { BILINGUAL, aliasEntries } from './context';
 import { callGemini } from './gemini';
 import { SYSTEM_INSTRUCTION } from './prompts';
-import type { Entry } from '../db/types';
+import type { Bi, Entry } from '../db/types';
+import { entryOriginal } from '../i18n/localize';
 
 export interface SuggestedLink {
   toId: string;
   kind: 'connection' | 'contradiction';
-  rationale: string;
+  rationale: Bi;
 }
 
 const LINKS_SCHEMA = {
@@ -17,46 +19,44 @@ const LINKS_SCHEMA = {
       items: {
         type: 'OBJECT',
         properties: {
-          toId: { type: 'STRING' },
+          to: { type: 'STRING' },
           kind: { type: 'STRING', enum: ['connection', 'contradiction'] },
-          rationale: { type: 'STRING' },
+          rationale_tr: { type: 'STRING' },
+          rationale_en: { type: 'STRING' },
         },
-        required: ['toId', 'kind', 'rationale'],
+        required: ['to', 'kind', 'rationale_tr', 'rationale_en'],
       },
     },
   },
   required: ['links'],
 };
 
-export async function findLinks(
-  entry: Entry,
-  candidates: Entry[],
-  apiKey: string,
-  model: string,
-): Promise<SuggestedLink[]> {
+interface RawLink {
+  to: string;
+  kind: 'connection' | 'contradiction';
+  rationale_tr: string;
+  rationale_en: string;
+}
+
+export async function findLinks(entry: Entry, candidates: Entry[], apiKey: string, model: string): Promise<SuggestedLink[]> {
   if (candidates.length === 0) return [];
+  const aliased = aliasEntries(candidates, { maxChars: 260 });
 
-  const source = entry.ai.summary || entry.text || entry.transcript || '';
-  const candidateBlock = candidates
-    .map((c) => `- id: ${c.id} | ${c.ai.summary || c.text || c.transcript || ''}`)
-    .join('\n');
-
-  const instructions = `Aşağıda bir fikir defterindeki YENİ girdi ve aynı projedeki DİĞER girdilerin özetleri var.
-Görevin: yeni girdinin diğerleriyle güçlü bir bağlantısı ya da çelişkisi varsa bulmak.
+  const instructions = `Aşağıda YENİ bir girdi ve DİĞER girdiler var. Yeni girdinin diğerleriyle güçlü bir bağlantısı ya da çelişkisi varsa bul.
 
 Kurallar:
-- En fazla 3 öneri döndür. Zayıf, yüzeysel benzerlikleri önerme; sadece gerçekten anlamlı olanları.
-- kind "connection": iki fikir aynı temayı/motifi geliştiriyor ya da birbirini tamamlıyor.
-- kind "contradiction": iki fikir birbiriyle çelişiyor ya da gerilim içinde.
-- rationale en fazla bir cümle, neden bağlantılı/çelişkili olduğunu açıkla.
-- toId, aşağıdaki listeden birebir bir id olmalı. Hiçbir güçlü bağlantı yoksa boş liste döndür.
+- En fazla 3 öneri. Zayıf, yüzeysel benzerlikleri önerme.
+- kind "connection": iki fikir aynı temayı ya da motifi geliştiriyor, birbirini tamamlıyor.
+- kind "contradiction": iki fikir birbiriyle verimli bir gerilim içinde.
+- rationale en fazla bir cümle. ${BILINGUAL} (rationale_tr ve rationale_en)
+- "to" alanı aşağıdaki listeden birebir bir takma ad olsun (E1, E2...). Güçlü bağ yoksa boş liste döndür.
 
-Yeni girdi: ${source}
+Yeni girdi: ${entryOriginal(entry)}
 
 Diğer girdiler:
-${candidateBlock}`;
+${aliased.block}`;
 
-  const result = await callGemini<{ links: SuggestedLink[] }>({
+  const result = await callGemini<{ links: RawLink[] }>({
     apiKey,
     model,
     systemInstruction: SYSTEM_INSTRUCTION,
@@ -64,6 +64,8 @@ ${candidateBlock}`;
     responseSchema: LINKS_SCHEMA,
   });
 
-  const knownIds = new Set(candidates.map((c) => c.id));
-  return result.links.filter((l) => knownIds.has(l.toId));
+  return result.links.flatMap((l) => {
+    const toId = aliased.resolve(l.to);
+    return toId ? [{ toId, kind: l.kind, rationale: { tr: l.rationale_tr, en: l.rationale_en } }] : [];
+  });
 }

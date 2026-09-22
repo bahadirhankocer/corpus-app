@@ -1,13 +1,15 @@
 /**
  * Push Worker for Corpus.
  *
- * It only knows browser push subscriptions and a daily schedule. It never sees the Gemini key, entries or
- * questions: each push is an empty "wake up" and the app writes the question itself when it opens.
+ * It only knows browser push subscriptions and when to wake each phone. It never sees the Gemini key,
+ * entries or notification text: every push is empty, and the phone decides what to show.
  *
  *   GET  /vapid        public VAPID key (created on first call)
- *   POST /subscribe    { subscription, tzOffsetMin, startHour, endHour, perDay, lang }
+ *   POST /subscribe    { subscription, tzOffsetMin, startHour, endHour, slots, morning }
  *   POST /unsubscribe  { endpoint }
- *   cron every 10 min  sends the pushes planned for today
+ *   POST /ping         { endpoint, at }   one extra wake-up at a given time
+ *   POST /test         { endpoint }       one wake-up right now
+ *   cron every 10 min  sends what is due
  */
 
 interface KV {
@@ -27,8 +29,10 @@ interface Registration {
   tzOffsetMin: number;
   startHour: number;
   endHour: number;
-  perDay: number;
-  lang: string;
+  slots: number;
+  morning: boolean;
+  /** one-off wake-ups, ISO times */
+  pings?: string[];
 }
 
 interface DayPlan {
@@ -37,7 +41,8 @@ interface DayPlan {
 }
 
 const WINDOW_MIN = 30;
-const MIN_GAP_MIN = 180;
+const MIN_GAP_MIN = 150;
+const MAX_PINGS = 12;
 
 const b64url = (bytes: ArrayBuffer | Uint8Array): string => {
   const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
@@ -105,17 +110,20 @@ async function sendPush(endpoint: string, vapid: VapidKeys): Promise<boolean> {
   return res.status !== 404 && res.status !== 410;
 }
 
+/** Minutes of the local day to wake the phone: an optional morning slot plus random ones. */
 function planDay(reg: Registration): number[] {
   const start = Math.max(0, reg.startHour) * 60;
   const end = Math.min(24, reg.endHour) * 60 - WINDOW_MIN;
-  const count = Math.min(Math.max(1, reg.perDay), 3);
-  for (let attempt = 0; attempt < 50; attempt++) {
-    const picks = Array.from({ length: count }, () => start + Math.floor(Math.random() * Math.max(1, end - start))).sort(
-      (a, b) => a - b,
-    );
-    if (picks.every((m, i) => i === 0 || m - picks[i - 1] >= MIN_GAP_MIN)) return picks;
+  const picks: number[] = [];
+  if (reg.morning) picks.push(start + Math.floor(Math.random() * 45));
+  const count = Math.min(Math.max(0, reg.slots), 5);
+  const from = reg.morning ? start + 90 : start;
+  for (let attempt = 0; attempt < 80 && picks.length < count + (reg.morning ? 1 : 0); attempt++) {
+    const m = from + Math.floor(Math.random() * Math.max(1, end - from));
+    const gap = attempt < 60 ? MIN_GAP_MIN : 60;
+    if (picks.every((p) => Math.abs(p - m) >= gap)) picks.push(m);
   }
-  return [start + Math.floor((end - start) / 2)];
+  return picks.sort((a, b) => a - b);
 }
 
 function cors(env: Env, request: Request): Record<string, string> {
@@ -142,7 +150,10 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
   if (pathname === '/subscribe' && request.method === 'POST') {
     const body = (await request.json()) as Registration;
     if (!body?.subscription?.endpoint) return new Response('bad request', { status: 400, headers });
-    await env.CORPUS_KV.put(`sub:${await sha256Hex(body.subscription.endpoint)}`, JSON.stringify(body));
+    const key = `sub:${await sha256Hex(body.subscription.endpoint)}`;
+    const existing = await env.CORPUS_KV.get(key);
+    const pings = existing ? ((JSON.parse(existing) as Registration).pings ?? []) : [];
+    await env.CORPUS_KV.put(key, JSON.stringify({ ...body, pings }));
     return new Response('ok', { headers });
   }
 
@@ -150,6 +161,27 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
     const body = (await request.json()) as { endpoint?: string };
     if (body?.endpoint) await env.CORPUS_KV.delete(`sub:${await sha256Hex(body.endpoint)}`);
     return new Response('ok', { headers });
+  }
+
+  if (pathname === '/ping' && request.method === 'POST') {
+    const body = (await request.json()) as { endpoint?: string; at?: string };
+    if (!body?.endpoint || !body.at || Number.isNaN(Date.parse(body.at))) return new Response('bad request', { status: 400, headers });
+    const key = `sub:${await sha256Hex(body.endpoint)}`;
+    const raw = await env.CORPUS_KV.get(key);
+    if (!raw) return new Response('unknown', { status: 404, headers });
+    const reg = JSON.parse(raw) as Registration;
+    reg.pings = [...(reg.pings ?? []), body.at].sort().slice(-MAX_PINGS);
+    await env.CORPUS_KV.put(key, JSON.stringify(reg));
+    return new Response('ok', { headers });
+  }
+
+  if (pathname === '/test' && request.method === 'POST') {
+    const body = (await request.json()) as { endpoint?: string };
+    if (!body?.endpoint) return new Response('bad request', { status: 400, headers });
+    const raw = await env.CORPUS_KV.get(`sub:${await sha256Hex(body.endpoint)}`);
+    if (!raw) return new Response('unknown', { status: 404, headers });
+    const ok = await sendPush(body.endpoint, await getVapid(env));
+    return new Response(ok ? 'ok' : 'gone', { status: ok ? 200 : 410, headers });
   }
 
   return new Response('not found', { status: 404, headers });
@@ -172,17 +204,30 @@ async function handleScheduled(env: Env): Promise<void> {
 
     const stored = await env.CORPUS_KV.get(planKey);
     const plan: DayPlan = stored ? (JSON.parse(stored) as DayPlan) : { minutes: planDay(reg), sent: [] };
+    let planChanged = !stored;
+    let due = false;
 
     for (const minute of plan.minutes) {
       if (plan.sent.includes(minute)) continue;
       if (minuteOfDay < minute || minuteOfDay >= minute + WINDOW_MIN) continue;
       plan.sent.push(minute);
-      if (!(await sendPush(reg.subscription.endpoint, vapid))) {
-        await env.CORPUS_KV.delete(name);
-        break;
-      }
+      planChanged = true;
+      due = true;
     }
-    await env.CORPUS_KV.put(planKey, JSON.stringify(plan), { expirationTtl: 2 * 24 * 60 * 60 });
+
+    const pings = reg.pings ?? [];
+    const remaining = pings.filter((at) => Date.parse(at) > now);
+    if (remaining.length !== pings.length) {
+      due = true;
+      reg.pings = remaining;
+      await env.CORPUS_KV.put(name, JSON.stringify(reg));
+    }
+
+    if (due && !(await sendPush(reg.subscription.endpoint, vapid))) {
+      await env.CORPUS_KV.delete(name);
+      continue;
+    }
+    if (planChanged) await env.CORPUS_KV.put(planKey, JSON.stringify(plan), { expirationTtl: 2 * 24 * 60 * 60 });
   }
 }
 

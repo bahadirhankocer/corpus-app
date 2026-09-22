@@ -12,18 +12,56 @@
     "close": "Close"
   },
   "nav": {
-    "capture": "Capture",
+    "corpus": "Corpus",
     "feed": "Feed",
-    "map": "Map",
+    "map": "Map"
+  },
+  "layer": {
+    "code": "Layer {{n}}",
     "sequence": "Sequence",
+    "links": "Connections",
     "digests": "Digests",
-    "audiolog": "Log",
+    "audiolog": "Audio Log",
     "settings": "Settings",
-    "atelier": "Atelier"
+    "versions": "Versions"
+  },
+  "aiState": {
+    "idle": "calm",
+    "thinking": "thinking",
+    "waiting": "waiting for quota"
   },
   "offline": {
     "label": "offline",
     "queued": "{{count}} queued"
+  },
+  "corpus": {
+    "name": "Corpus",
+    "thinking": "writing",
+    "older": "Older version",
+    "newer": "Newer version",
+    "empty": "Corpus starts writing itself with your first entries. Tap the ring below.",
+    "writing": "The first text is being written. It can take a few minutes.",
+    "noKey": "The AI needs a key. Enter it once in Settings or through a setup link.",
+    "writeNow": "Write now",
+    "rewrite": "Rewrite",
+    "bridge": "Why I connected this",
+    "capture": "New entry"
+  },
+  "dossier": {
+    "title": "File",
+    "refresh": "Refresh",
+    "empty": "The file is prepared after the first version of the corpus.",
+    "candidate": "Video candidate",
+    "brief": "Brief",
+    "scenario": "Scenario",
+    "themes": "Animation themes",
+    "side": "Side ideas",
+    "sketch": "Sketch",
+    "source": "Source",
+    "regenerate": "Regenerate",
+    "sketching": "Writing the sketch",
+    "sketchFailed": "The sketch could not be written. Check your connection and try again.",
+    "manifesto": "Manifesto"
   },
   "capture": {
     "writeButton": "Text",
@@ -37,13 +75,13 @@
     "importanceMid": "Mid",
     "importanceHigh": "High",
     "contextLabel": "Context",
-    "saved": "Saved · processing",
+    "saved": "Saved · going into the corpus",
     "categoriesLabel": "Categories",
     "projectLabel": "Project",
     "tagsLabel": "Tags (comma separated)"
   },
   "feed": {
-    "empty": "No entries yet. Start from Capture.",
+    "empty": "No entries yet. Start from the ring on the Corpus screen.",
     "kindVoice": "VOICE",
     "kindText": "TEXT",
     "voicePlaceholder": "(voice note)",
@@ -62,11 +100,34 @@
     "aiSummary": "AI summary",
     "aiError": "AI error",
     "retry": "Retry",
-    "linkedEntries": "Linked entries"
+    "linkedEntries": "Written on this entry",
+    "thread": "Questions and your answers",
+    "answerTo": "In answer to",
+    "showOriginal": "show original",
+    "showTranslation": "show translation"
   },
-  "followup": {
-    "nudge": "a question is waiting",
-    "scrollHint": "scroll down"
+  "question": {
+    "skip": "Skip",
+    "scrollHint": "scroll down",
+    "ownWords": "In my own words",
+    "writePlaceholder": "Write…",
+    "send": "Send",
+    "waiting_one": "a question is waiting",
+    "waiting_other": "{{count}} questions are waiting",
+    "kind": {
+      "followup": "follow-up",
+      "deepen": "go deeper",
+      "imagine": "imagine",
+      "sequence": "sequence",
+      "pattern": "pattern"
+    }
+  },
+  "interview": {
+    "later": "Later",
+    "thinking": "The AI is preparing a question…",
+    "composing": "Writing the manifesto and procedure…",
+    "procedure": "Working procedure",
+    "error": "The interview could not continue. Check your connection and API key."
   },
   "resurface": {
     "skip": "Skip",
@@ -74,7 +135,8 @@
   },
   "map": {
     "noProjects": "No projects yet",
-    "empty": "No processed entries in this project.",
+    "empty": "The map starts to appear once the first entry is processed.",
+    "caption": "{{entries}} entries · {{links}} links",
     "accept": "Accept",
     "reject": "Reject"
   },
@@ -102,15 +164,14 @@
     "none": "None."
   },
   "digests": {
-    "empty": "No digests yet. With AI processing on, one is generated automatically at the end of each day/week.",
+    "empty": "No digests yet. One is written at the end of every week.",
     "daily": "Daily",
     "weekly": "Weekly"
   },
   "audiolog": {
-    "title": "Audio Log",
-    "generate": "Prepare this week's log",
+    "generate": "Prepare the log",
     "generating": "Preparing…",
-    "empty": "No Audio Log yet.",
+    "empty": "No Audio Log yet. The first log covers everything you have written so far; each next one starts where the previous ended.",
     "status": {
       "draft": "draft",
       "final": "final",
@@ -118,10 +179,9 @@
       "published": "published"
     },
     "statusLabel": "Status",
-    "paragraphs": "Paragraphs",
-    "sourceCount": "{{count}} source",
-    "rewrite": "Rewrite",
-    "improveGeneric": "improve per the style guide",
+    "paragraphs": "Text",
+    "sourceCount_one": "{{count}} source",
+    "sourceCount_other": "{{count}} sources",
     "patreonIntro": "Patreon intro",
     "exportMd": "Download MD",
     "exportTxt": "Download TXT",
@@ -135,6 +195,17 @@
     "scene": "Scene / sequence",
     "motion": "Animation / motion"
   },
+  "categoryCode": {
+    "theme": "THM",
+    "sound": "SND",
+    "voiceover": "VO",
+    "scene": "SCN",
+    "motion": "MOT"
+  },
+  "versions": {
+    "current": "Current version",
+    "built": "built"
+  },
   "settings": {
     "language": "Language",
     "theme": "Theme",
@@ -143,19 +214,36 @@
     "themeDark": "Dark",
     "ai": {
       "title": "AI",
-      "privacyNotice": "Privacy: content sent on Gemini's free tier may be used by Google for product development. Keep this in mind for unpublished ideas. The API key is stored only on this device and never sent anywhere else.",
+      "privacyNotice": "Privacy: content sent on Gemini's free tier may be used by Google for product development. Keep this in mind for unpublished ideas. The API key is stored only on this device.",
       "apiKeyLabel": "Gemini API key",
-      "apiKeyHint": "Stored only on this device.",
       "apiKeySaved": "Saved. Stored only on this device.",
-      "modelLabel": "Model name",
-      "enabledLabel": "AI processing",
-      "on": "On",
-      "off": "Off",
+      "setupHint": "Paste the key once and you will never be asked again. You can create a setup link for another device.",
+      "setupDone": "Key saved",
       "change": "Replace key",
       "copyLink": "Copy setup link",
       "copied": "Copied",
-      "setupHint": "Paste the key once and you will never be asked again. You can create a setup link for another device.",
-      "setupDone": "Key saved"
+      "modelLabel": "Model name",
+      "enabledLabel": "AI processing",
+      "on": "On",
+      "off": "Off"
+    },
+    "prompts": {
+      "title": "Notifications",
+      "listen": "\"I listened\" notifications per day",
+      "questions": "Question notifications per day",
+      "morning": "Morning core",
+      "from": "Start hour",
+      "to": "End hour",
+      "test": "Send a test notification",
+      "testSent": "Sent. It should arrive in a few seconds.",
+      "push": {
+        "label": "Notifications",
+        "hint": "Notifications arrive at random moments between these hours. Their text is chosen on your phone.",
+        "unsupported": "Notifications are not supported in this browser. Add the app to your home screen and open it from there.",
+        "no-worker": "The notification server is not set up yet.",
+        "denied": "Notification permission was not granted. You can allow it in your phone's settings.",
+        "error": "Could not reach the notification server."
+      }
     },
     "projects": {
       "title": "Projects",
@@ -173,79 +261,6 @@
     "audioLogTargetMinutes": "Target length (min)",
     "audioLogWpm": "Words per minute",
     "audioLogLang": "Audio Log language",
-    "audioLogCues": "Production cues",
-    "prompts": {
-      "title": "AI questions",
-      "perDay": "Questions per day",
-      "from": "Start hour",
-      "to": "End hour",
-      "push": {
-        "label": "Notifications",
-        "hint": "Questions arrive as notifications at random hours.",
-        "unsupported": "Notifications are not supported in this browser. Add the app to the home screen and try again.",
-        "no-worker": "The notification server (Cloudflare Worker) is not set up yet. See worker/README.md.",
-        "denied": "Notification permission was not granted.",
-        "error": "Could not turn notifications on. The server was unreachable."
-      }
-    }
-  },
-  "layer": {
-    "code": "Layer {{n}}",
-    "map": "Map",
-    "sequence": "Sequence",
-    "digests": "Digests",
-    "audiolog": "Audio Log",
-    "settings": "Settings",
-    "versions": "Versions"
-  },
-  "atelier": {
-    "state": {
-      "idle": "calm",
-      "thinking": "thinking",
-      "waiting": "waiting for quota"
-    },
-    "noKey": "no key",
-    "calls": "{{count}} calls",
-    "empty": "The map starts to appear once the first entry is processed.",
-    "thoughts": "Thoughts",
-    "noThoughts": "The AI will leave short thoughts here on every new entry.",
-    "noCompendium": "The compendium for this project forms as entries are processed.",
-    "manifesto": "Manifesto",
-    "startInterview": "Start the project interview",
-    "kind": {
-      "pattern": "pattern",
-      "imagine": "imagine",
-      "sequence": "sequence",
-      "connection": "link",
-      "contradiction": "tension",
-      "note": "note"
-    }
-  },
-  "question": {
-    "skip": "Skip",
-    "scrollHint": "scroll down",
-    "ownWords": "In my own words",
-    "writePlaceholder": "Write…",
-    "send": "Send",
-    "waiting_one": "a question is waiting",
-    "waiting_other": "{{count}} questions are waiting",
-    "kind": {
-      "followup": "follow-up",
-      "deepen": "go deeper",
-      "imagine": "imagine",
-      "sequence": "sequence",
-      "pattern": "pattern"
-    }
-  },
-  "interview": {
-    "later": "Later",
-    "thinking": "The AI is preparing a question…",
-    "composing": "Writing the manifesto and procedure…",
-    "procedure": "Working procedure",
-    "error": "The interview could not continue. Check your connection and API key."
-  },
-  "versions": {
-    "current": "Current version",
-    "built": "built"
+    "audioLogCues": "Production cues"
   }
 }

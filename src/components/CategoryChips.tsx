@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 
-import { ALL_CATEGORIES, CATEGORY_CODES } from '../constants/categories';
+import { ALL_CATEGORIES, categoryCode } from '../constants/categories';
 import type { Category } from '../db/types';
 import styles from './CategoryChips.module.css';
 
@@ -31,7 +31,7 @@ export function CategoryChips({ value, onChange }: Props) {
           onClick={() => toggle(category)}
           title={t(`category.${category}`)}
         >
-          {CATEGORY_CODES[category]}
+          {categoryCode(category)}
         </button>
       ))}
     </div>

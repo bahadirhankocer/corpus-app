@@ -1,7 +1,7 @@
 import { callGemini } from './gemini';
 import { SYSTEM_INSTRUCTION } from './prompts';
 import { effectiveCategories, effectiveTags } from '../db/effective';
-import type { Entry } from '../db/types';
+import type { Entry, Lang } from '../db/types';
 
 export interface SequenceSection {
   label: string;
@@ -26,7 +26,7 @@ const SEQUENCE_SCHEMA = {
   required: ['sections'],
 };
 
-export async function draftSequence(entries: Entry[], apiKey: string, model: string): Promise<SequenceSection[]> {
+export async function draftSequence(entries: Entry[], lang: Lang, apiKey: string, model: string): Promise<SequenceSection[]> {
   const block = entries
     .map(
       (e) =>
@@ -34,11 +34,12 @@ export async function draftSequence(entries: Entry[], apiKey: string, model: str
     )
     .join('\n');
 
-  const instructions = `Aşağıda bir projedeki tüm fikir defteri girdileri var. Görevin bunları mantıklı bir sekansa (bölümlere) dizmek — ör. Intro, Gelişme, Dönüm noktası, Sonuç gibi, ama projenin içeriğine uygun kendi bölüm adlarını üret.
+  const instructions = `Aşağıda bir projedeki tüm fikir girdileri var. Görevin bunları mantıklı bir sekansa (bölümlere) dizmek — ör. Intro, Gelişme, Dönüm noktası, Sonuç gibi, ama projenin içeriğine uygun kendi bölüm adlarını üret.
 
 Kurallar:
 - Her girdi en fazla bir bölümde yer alsın.
-- Bir bölüme sığmayan/yerleşmeyen girdileri "Yerleşmemiş" adlı son bölüme koy.
+- Bir bölüme sığmayan/yerleşmeyen girdileri ${lang === 'en' ? '"Unplaced"' : '"Yerleşmemiş"'} adlı son bölüme koy.
+- Bölüm adlarını ${lang === 'en' ? 'İngilizce' : 'Türkçe'} yaz.
 - Bölüm sırası, önerdiğin akış sırası olsun.
 - Yeni fikir üretme, sadece verilen girdileri düzenle.
 

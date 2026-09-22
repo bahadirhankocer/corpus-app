@@ -1,0 +1,120 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 22;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  animation: fade 0.3s ease both;
+}
+
+.scrim[data-closing='true'] {
+  animation: fade-out 0.22s ease both;
+}
+
+.sheet {
+  width: 100%;
+  max-width: 620px;
+  max-height: 72dvh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5) var(--space-4) max(var(--space-5), env(safe-area-inset-bottom));
+  border-radius: var(--radius) var(--radius) 0 0;
+  background: var(--color-surface);
+  animation: rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.scrim[data-closing='true'] .sheet {
+  animation: sink 0.22s cubic-bezier(0.5, 0, 0.75, 0) both;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    transform: translate3d(0, 40px, 0);
+    opacity: 0;
+  }
+}
+
+@keyframes sink {
+  to {
+    transform: translate3d(0, 30px, 0);
+  }
+}
+
+.micro {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+}
+
+.term {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 300;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.why {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--color-text);
+}
+
+.sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.source {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.quote {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--color-text-muted);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.quote::before {
+  content: '“';
+}
+
+.quote::after {
+  content: '”';
+}

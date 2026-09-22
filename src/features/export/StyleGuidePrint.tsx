@@ -6,7 +6,9 @@ import { effectiveCategories } from '../../db/effective';
 import { useLinksForEntries } from '../../db/links';
 import type { Category, Entry, Project, Sequence } from '../../db/types';
 import { formatDateTime } from '../../utils/format';
+import { useBackHandler } from '../../app/backStack';
 import styles from './StyleGuidePrint.module.css';
+import { asLang, entryHeadline, loc } from '../../i18n/localize';
 
 interface Props {
   project: Project;
@@ -15,12 +17,11 @@ interface Props {
   onClose: () => void;
 }
 
-function entryPreview(entry: Entry): string {
-  return entry.title || entry.text || entry.transcript || entry.ai.summary || '';
-}
-
 export function StyleGuidePrint({ project, entries, sequence, onClose }: Props) {
   const { t, i18n } = useTranslation();
+  const lang = asLang(i18n.language);
+  useBackHandler(true, onClose);
+  const entryPreview = (entry: Entry) => entryHeadline(entry, lang);
   const entryIds = entries.map((e) => e.id);
   const links = useLinksForEntries(entryIds);
   const entryMap = new Map(entries.map((e) => [e.id, e]));
@@ -88,7 +89,7 @@ export function StyleGuidePrint({ project, entries, sequence, onClose }: Props) 
           {accepted.length > 0 ? (
             accepted.map((l) => (
               <p key={l.id} className={styles.line}>
-                {entryPreview(entryMap.get(l.fromId)!)} — {entryPreview(entryMap.get(l.toId)!)}: {l.rationale}
+                {entryPreview(entryMap.get(l.fromId)!)} — {entryPreview(entryMap.get(l.toId)!)}: {loc(l.rationale, lang)}
               </p>
             ))
           ) : (
@@ -101,7 +102,7 @@ export function StyleGuidePrint({ project, entries, sequence, onClose }: Props) 
           {contradictions.length > 0 ? (
             contradictions.map((l) => (
               <p key={l.id} className={styles.line}>
-                {entryPreview(entryMap.get(l.fromId)!)} — {entryPreview(entryMap.get(l.toId)!)}: {l.rationale}
+                {entryPreview(entryMap.get(l.fromId)!)} — {entryPreview(entryMap.get(l.toId)!)}: {loc(l.rationale, lang)}
               </p>
             ))
           ) : (

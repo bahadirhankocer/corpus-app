@@ -2,6 +2,31 @@ export type Category = 'theme' | 'sound' | 'voiceover' | 'scene' | 'motion';
 
 export type AiStatus = 'pending' | 'processing' | 'done' | 'error' | 'disabled';
 
+export type Lang = 'tr' | 'en';
+
+/** A text the AI wrote in both languages, so switching language changes everything at once. */
+export type Bi<T = string> = Record<Lang, T>;
+
+/** Older records hold a single string; everything written from 0.3.0 on is bilingual. */
+export type LocalText = string | Bi;
+
+export interface EntryTranslation {
+  title?: string;
+  text?: string;
+  summary?: string;
+  tags?: string[];
+  /** translated thread answers, same order as `Entry.thread` */
+  thread?: string[];
+}
+
+/** A follow-up question the AI asked about an entry, and how it was answered. */
+export interface ThreadItem {
+  question: LocalText;
+  /** an option picked from a bilingual question is stored in both languages */
+  answer: LocalText;
+  at: string;
+}
+
 export interface Entry {
   id: string;
   createdAt: string;
@@ -15,6 +40,14 @@ export interface Entry {
   context?: string;
   parentEntryId?: string;
   lastSurfacedAt?: string;
+  /** the question from the AI that this entry answers, when it was written in reply to one */
+  promptQuestion?: LocalText;
+  thread?: ThreadItem[];
+  /** the language the user wrote in */
+  lang?: Lang;
+  i18n?: Partial<Record<Lang, EntryTranslation>>;
+  /** signature of the source text the translations were made for */
+  i18nFor?: string;
   ai: {
     status: AiStatus;
     categories: Category[];
@@ -24,7 +57,7 @@ export interface Entry {
     summary?: string;
     error?: string;
     processedAt?: string;
-    /** false while the reflection chain (follow-up, links, thoughts) is still owed */
+    /** false while the enrichment chain (translation, follow-up, links) is still owed */
     enriched?: boolean;
   };
   overrides: {
@@ -50,26 +83,18 @@ export interface Project {
   keywords: string[];
   status: 'active' | 'archived';
   /** what this project is really about, written by the AI after the interview */
-  manifesto?: string;
+  manifesto?: LocalText;
   /** how the AI should work inside this project */
-  procedure?: string;
-  /** the AI's living compendium of the project, revised after every entry */
-  compendium?: string;
-  compendiumUpdatedAt?: string;
-}
-
-export type ThoughtKind = 'connection' | 'contradiction' | 'pattern' | 'imagine' | 'sequence' | 'note';
-
-export interface Thought {
-  id: string;
-  kind: ThoughtKind;
-  text: string;
-  entryIds: string[];
-  projectId?: string;
-  createdAt: string;
+  procedure?: LocalText;
 }
 
 export type PromptKind = 'deepen' | 'imagine' | 'sequence' | 'pattern';
+
+export interface QuestionText {
+  context?: string;
+  question: string;
+  options: string[];
+}
 
 export interface Prompt {
   id: string;
@@ -79,6 +104,7 @@ export interface Prompt {
   context: string;
   question: string;
   options: string[];
+  i18n?: Bi<QuestionText>;
   status: 'pending' | 'answered' | 'skipped';
   answerEntryId?: string;
   createdAt: string;
@@ -89,6 +115,7 @@ export interface FollowUp {
   entryId: string;
   question: string;
   options: string[];
+  i18n?: Bi<QuestionText>;
   status: 'pending' | 'answered' | 'dismissed';
   answerEntryId?: string;
   createdAt: string;
@@ -99,7 +126,7 @@ export interface Link {
   fromId: string;
   toId: string;
   kind: 'connection' | 'contradiction';
-  rationale: string;
+  rationale: LocalText;
   state: 'suggested' | 'accepted' | 'dismissed';
   createdAt: string;
 }
@@ -122,7 +149,7 @@ export interface Digest {
   id: string;
   kind: 'daily' | 'weekly';
   periodStart: string;
-  body: string;
+  body: LocalText;
   entryIds: string[];
   createdAt: string;
 }
@@ -132,7 +159,9 @@ export interface AudioLog {
   number: number;
   title: string;
   weekStart: string;
-  lang: 'tr' | 'en';
+  /** end of the period this log covers; the next log starts here */
+  rangeEnd?: string;
+  lang: Lang;
   version: number;
   paragraphs: {
     text: string;
@@ -145,9 +174,69 @@ export interface AudioLog {
   createdAt: string;
 }
 
+export interface CorpusBridge {
+  id: string;
+  term: Bi;
+  why: Bi;
+  entryIds: string[];
+}
+
+/** One version of the living text. A new version is written after entries change. */
+export interface CorpusDoc {
+  id: string;
+  createdAt: string;
+  /** fingerprint of the entries it was written from */
+  sourceSig: string;
+  entryCount: number;
+  title: Bi;
+  core: Bi;
+  direction: Bi;
+  sections: { heading: Bi; body: Bi }[];
+  bridges: CorpusBridge[];
+  /** how the newest entries changed the corpus, used for the echo notification */
+  delta: Bi;
+  /** tomorrow morning's notification */
+  morning: Bi;
+}
+
+export interface DossierTheme {
+  key: string;
+  name: Bi;
+  description: Bi;
+  entryIds: string[];
+}
+
+/** The material a video needs, derived from the corpus less often than the corpus itself. */
+export interface Dossier {
+  id: string;
+  createdAt: string;
+  entryCount: number;
+  candidate: { title: Bi; logline: Bi; structure: Bi };
+  brief: Bi;
+  scenario: Bi;
+  themes: DossierTheme[];
+  sideIdeas: { text: Bi; entryIds: string[] }[];
+}
+
+export interface Sketch {
+  key: string;
+  html: string;
+  createdAt: string;
+}
+
+/** A notification waiting to be shown by the service worker when a push arrives. */
+export interface Note {
+  id: string;
+  kind: 'listen' | 'echo' | 'morning';
+  body: Bi;
+  dueAt?: string;
+  usedAt?: string;
+  createdAt: string;
+}
+
 export interface Settings {
   id: 'app';
-  lang: 'tr' | 'en';
+  lang: Lang;
   theme: 'light' | 'dark' | 'system';
   geminiApiKey?: string;
   model: string;
@@ -162,18 +251,27 @@ export interface Settings {
     nextNumber: number;
     targetMinutes: number;
     wordsPerMinute: number;
-    lang: 'tr' | 'en';
+    lang: Lang;
     cues: boolean;
   };
-  /** proactive questions and their push notifications */
+  /** questions the AI writes on its own while the app is open */
   prompts: {
     perDay: 1 | 2 | 3;
     startHour: number;
     endHour: number;
     lastCreatedAt?: string;
   };
+  /** push notifications per day */
+  notify: {
+    listen: number;
+    questions: number;
+    morning: boolean;
+  };
+  lastNotesAt?: string;
   pushWorkerUrl?: string;
   pushSubscribed?: boolean;
+  /** one-off data migrations that already ran */
+  dataVersion?: number;
 }
 
 export const DEFAULT_STYLE_GUIDE = `Register: duru. Süssüz, açık, fazla açıklamasız, kasıntısız.
@@ -201,4 +299,5 @@ export const DEFAULT_SETTINGS: Settings = {
     cues: true,
   },
   prompts: { perDay: 2, startHour: 9, endHour: 22 },
+  notify: { listen: 2, questions: 1, morning: true },
 };

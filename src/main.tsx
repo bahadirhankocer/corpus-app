@@ -17,9 +17,33 @@ import '@fontsource/jost/latin-ext-400.css'
 import './index.css'
 import './i18n'
 import App from './App.tsx'
+import { importLegacyDatabases } from './db/legacy'
+import { runDataMigrations } from './db/migrations'
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+/** Service workers left by earlier builds at another path would keep serving an old copy of the app. */
+async function removeForeignServiceWorkers(): Promise<void> {
+  if (import.meta.env.DEV || !('serviceWorker' in navigator)) return
+  const scope = new URL(import.meta.env.BASE_URL, window.location.href).href
+  for (const registration of await navigator.serviceWorker.getRegistrations()) {
+    if (registration.scope !== scope) await registration.unregister()
+  }
+}
+
+async function boot(): Promise<void> {
+  // Data has to be in place before anything reads settings, or defaults would shadow the real ones.
+  try {
+    await importLegacyDatabases()
+    await runDataMigrations()
+  } catch (err) {
+    console.error('startup migration failed', err)
+  }
+  void removeForeignServiceWorkers()
+
+  createRoot(document.getElementById('root')!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  )
+}
+
+void boot()

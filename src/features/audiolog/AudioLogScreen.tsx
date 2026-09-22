@@ -6,7 +6,7 @@ import { useSettings } from '../../db/settings';
 import { formatDateTime } from '../../utils/format';
 import { AudioLogEditor } from './AudioLogEditor';
 import styles from './AudioLogScreen.module.css';
-import { generateWeeklyAudioLog } from './generateAudioLog';
+import { generateAudioLog } from './generateAudioLog';
 
 export function AudioLogScreen() {
   const { t, i18n } = useTranslation();
@@ -19,7 +19,7 @@ export function AudioLogScreen() {
     if (!settings) return;
     setGenerating(true);
     try {
-      const log = await generateWeeklyAudioLog(settings);
+      const log = await generateAudioLog(settings);
       if (log) setOpenId(log.id);
     } finally {
       setGenerating(false);

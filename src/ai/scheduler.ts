@@ -1,15 +1,19 @@
+import { refreshCorpus } from './corpusJob';
 import { ideatePrompt } from './ideate';
+import { writeListenNotes } from './notes';
 import { kickAiQueue, kickEnrichment } from './queue';
+import { addNotes, latestCorpus, recentListenBodies, unusedListenNotes } from '../db/corpus';
 import { db } from '../db/db';
-import { effectiveProjectId } from '../db/effective';
 import { createPrompt, expireOldPrompts, promptStats } from '../db/prompts';
 import { ensureSettings, updateSettings } from '../db/settings';
-import type { Entry, Prompt, PromptKind } from '../db/types';
+import type { Prompt, PromptKind } from '../db/types';
 
 const MIN_GAP_MS = 3 * 60 * 60 * 1000;
 const MAX_PENDING = 2;
 const RECENT_LIMIT = 15;
 const CHECK_INTERVAL_MS = 10 * 60 * 1000;
+const NOTES_LOW_WATER = 3;
+const NOTES_MIN_GAP_MS = 12 * 60 * 60 * 1000;
 
 const KIND_WEIGHTS: [PromptKind, number][] = [
   ['deepen', 35],
@@ -26,19 +30,6 @@ function pickKind(): PromptKind {
     if (roll <= 0) return kind;
   }
   return 'deepen';
-}
-
-/** Projects with more recent activity are asked about more often. */
-function pickProjectId(entries: Entry[], projectIds: string[]): string | undefined {
-  if (projectIds.length === 0) return undefined;
-  const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const weights = projectIds.map((id) => 1 + entries.filter((e) => effectiveProjectId(e) === id && new Date(e.createdAt).getTime() > weekAgo).length);
-  let roll = Math.random() * weights.reduce((a, b) => a + b, 0);
-  for (let i = 0; i < projectIds.length; i++) {
-    roll -= weights[i];
-    if (roll <= 0) return projectIds[i];
-  }
-  return projectIds[0];
 }
 
 function inActiveWindow(startHour: number, endHour: number): boolean {
@@ -75,32 +66,21 @@ export async function maybeCreatePrompt(options: { force?: boolean } = {}): Prom
     const done = await db.entries.where('ai.status').equals('done').reverse().sortBy('createdAt');
     if (done.length === 0) return null;
 
-    const activeProjects = await db.projects.where('status').equals('active').toArray();
-    const projectIds = activeProjects.filter((p) => done.some((e) => effectiveProjectId(e) === p.id)).map((p) => p.id);
-    const projectId = pickProjectId(done, projectIds);
-    const project = activeProjects.find((p) => p.id === projectId);
-    const pool = projectId ? done.filter((e) => effectiveProjectId(e) === projectId) : done;
-
     const previous = (await db.prompts.orderBy('createdAt').reverse().limit(8).toArray()).map((p) => p.question);
     const kind = pickKind();
-    const result = await ideatePrompt({
+    const text = await ideatePrompt({
       kind,
-      project,
-      recent: pool.slice(0, RECENT_LIMIT),
+      project: undefined,
+      corpus: await latestCorpus(),
+      recent: done.slice(0, RECENT_LIMIT),
       previousQuestions: previous,
       styleGuide: settings.styleGuide,
       apiKey: settings.geminiApiKey,
       model: settings.model,
     });
-    if (!result.question?.trim() || result.options?.length !== 3) return null;
+    if (!text.tr?.question?.trim() || text.tr.options?.length !== 3 || text.en?.options?.length !== 3) return null;
 
-    const prompt = await createPrompt({
-      kind,
-      projectId,
-      context: result.context?.trim() ?? '',
-      question: result.question.trim(),
-      options: result.options,
-    });
+    const prompt = await createPrompt({ kind, text });
     await updateSettings({ prompts: { ...settings.prompts, lastCreatedAt: prompt.createdAt } });
     return prompt;
   } catch {
@@ -110,12 +90,32 @@ export async function maybeCreatePrompt(options: { force?: boolean } = {}): Prom
   }
 }
 
-/** Keeps the AI working while the app is open: queue, enrichment and the day's questions. */
+/** Keeps a small pool of "I listened" notifications ready for the service worker. */
+async function maybeRefillNotes(): Promise<void> {
+  const settings = await ensureSettings();
+  if (!settings.pushSubscribed || !settings.aiEnabled || !settings.geminiApiKey || !navigator.onLine) return;
+  if ((await unusedListenNotes()).length >= NOTES_LOW_WATER) return;
+  if (settings.lastNotesAt && Date.now() - new Date(settings.lastNotesAt).getTime() < NOTES_MIN_GAP_MS) return;
+
+  const done = await db.entries.where('ai.status').equals('done').reverse().sortBy('createdAt');
+  if (done.length === 0) return;
+  await updateSettings({ lastNotesAt: new Date().toISOString() });
+  try {
+    const bodies = await writeListenNotes(done.slice(0, 25), await recentListenBodies(12), settings.geminiApiKey, settings.model);
+    await addNotes(bodies.map((body) => ({ kind: 'listen' as const, body })));
+  } catch {
+    // tried again after the gap
+  }
+}
+
+/** Keeps the AI working while the app is open: queue, enrichment, corpus, questions and notifications. */
 export function startBackgroundLoops(): () => void {
   const tick = () => {
     void kickAiQueue();
     void kickEnrichment();
+    void refreshCorpus();
     void maybeCreatePrompt();
+    void maybeRefillNotes();
   };
   const onVisible = () => {
     if (document.visibilityState === 'visible') tick();

@@ -4,21 +4,23 @@ import { useTranslation } from 'react-i18next';
 
 import { kickAiQueue } from './ai/queue';
 import { maybeCreatePrompt, startBackgroundLoops } from './ai/scheduler';
+import { useBackHandler } from './app/backStack';
 import { Layer } from './app/Layer';
 import type { LayerId, ScreenId } from './app/screens';
 import { LAYERS } from './app/screens';
 import { SwipeDeck } from './app/SwipeDeck';
 import { OfflineStrip } from './components/OfflineStrip';
 import { markSurfaced, pickResurfaceCandidate } from './db/entries';
+import { pendingQuestionCount } from './db/questions';
 import { ensureSettings, updateSettings, useSettings } from './db/settings';
-import { db } from './db/db';
 import type { Entry } from './db/types';
-import { AtelierScreen } from './features/atelier/AtelierScreen';
 import { CaptureScreen } from './features/capture/CaptureScreen';
+import { CorpusScreen } from './features/corpus/CorpusScreen';
 import { runDueDigests } from './features/digests/runDigests';
 import { EntryDetail } from './features/feed/EntryDetail';
 import { FeedScreen } from './features/feed/FeedScreen';
 import { ProjectInterview } from './features/interview/ProjectInterview';
+import { MapScreen } from './features/map/MapScreen';
 import { syncPush } from './features/push/push';
 import { QuestionFlow } from './features/question/QuestionFlow';
 import { Resurface } from './features/resurface/Resurface';
@@ -28,53 +30,39 @@ import i18n from './i18n';
 import { ensurePersistentStorage } from './utils/persistStorage';
 import { consumeSetupLink } from './utils/setupLink';
 
-const MapScreen = lazy(() => import('./features/map/MapScreen').then((m) => ({ default: m.MapScreen })));
+const LinksScreen = lazy(() => import('./features/links/LinksScreen').then((m) => ({ default: m.LinksScreen })));
 const SequenceScreen = lazy(() => import('./features/sequence/SequenceScreen').then((m) => ({ default: m.SequenceScreen })));
 const DigestsScreen = lazy(() => import('./features/digests/DigestsScreen').then((m) => ({ default: m.DigestsScreen })));
 const AudioLogScreen = lazy(() => import('./features/audiolog/AudioLogScreen').then((m) => ({ default: m.AudioLogScreen })));
 
 const RESURFACE_INTERVAL_MS = 18 * 60 * 60 * 1000;
 
-function layerFromHistory(): LayerId | null {
-  const layer = (window.history.state as { layer?: LayerId } | null)?.layer;
-  return layer && LAYERS.includes(layer) ? layer : null;
-}
-
 function App() {
   const { t } = useTranslation();
-  const [screen, setScreen] = useState<ScreenId>('capture');
-  const [layer, setLayer] = useState<LayerId | null>(layerFromHistory);
+  const [screen, setScreen] = useState<ScreenId>('corpus');
+  const [layer, setLayer] = useState<LayerId | null>(null);
   const [openEntryId, setOpenEntryId] = useState<string | null>(null);
+  const [capturing, setCapturing] = useState(false);
   const [questionOpen, setQuestionOpen] = useState(false);
   const [interviewProjectId, setInterviewProjectId] = useState<string | null>(null);
   const [resurfaceEntry, setResurfaceEntry] = useState<Entry | null | undefined>(undefined);
   const [notice, setNotice] = useState<string | null>(null);
   const settings = useSettings();
 
-  const openLayer = useCallback((id: LayerId) => {
-    window.history.pushState({ layer: id }, '');
-    setLayer(id);
-  }, []);
-
-  const closeLayer = useCallback(() => {
-    if (layerFromHistory()) window.history.back();
-    else setLayer(null);
-  }, []);
-
-  useEffect(() => {
-    const onPop = () => setLayer(layerFromHistory());
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
+  // Back walks down whatever is open; on the Corpus screen with nothing open it leaves the app.
+  useBackHandler(screen !== 'corpus', () => setScreen('corpus'));
+  useBackHandler(openEntryId !== null, () => setOpenEntryId(null));
+  useBackHandler(capturing, () => setCapturing(false));
+  useBackHandler(questionOpen, () => setQuestionOpen(false));
+  useBackHandler(interviewProjectId !== null, () => setInterviewProjectId(null));
 
   const openQuestions = useCallback(async () => {
-    const pending = (await db.prompts.where('status').equals('pending').count()) + (await db.followups.where('status').equals('pending').count());
-    if (pending > 0) setQuestionOpen(true);
+    if ((await pendingQuestionCount()) > 0) setQuestionOpen(true);
   }, []);
 
   // A push notification asks for a question right now.
   const answerPush = useCallback(async () => {
-    setScreen('capture');
+    setScreen('corpus');
     await maybeCreatePrompt({ force: true });
     await openQuestions();
   }, [openQuestions]);
@@ -154,11 +142,13 @@ function App() {
     setResurfaceEntry(null);
   }
 
+  useBackHandler(Boolean(resurfaceEntry), () => void handleResurfaceDone());
+
   if (resurfaceEntry) return <Resurface entry={resurfaceEntry} onDone={handleResurfaceDone} />;
 
   const layerNode: Record<LayerId, ReactNode> = {
-    map: <MapScreen onOpenEntry={setOpenEntryId} />,
     sequence: <SequenceScreen onOpenEntry={setOpenEntryId} />,
+    links: <LinksScreen onOpenEntry={setOpenEntryId} />,
     digests: <DigestsScreen />,
     audiolog: <AudioLogScreen />,
     settings: <SettingsScreen onStartInterview={setInterviewProjectId} />,
@@ -174,21 +164,18 @@ function App() {
         onChange={setScreen}
         panels={[
           {
-            id: 'capture',
-            node: <CaptureScreen onOpenQuestion={() => setQuestionOpen(true)} onOpenAtelier={() => setScreen('atelier')} />,
-          },
-          { id: 'feed', node: <FeedScreen onOpenEntry={setOpenEntryId} /> },
-          {
-            id: 'atelier',
+            id: 'corpus',
             node: (
-              <AtelierScreen
+              <CorpusScreen
                 onOpenEntry={setOpenEntryId}
-                onOpenLayer={openLayer}
+                onOpenLayer={setLayer}
                 onOpenQuestion={() => setQuestionOpen(true)}
-                onStartInterview={setInterviewProjectId}
+                onCapture={() => setCapturing(true)}
               />
             ),
           },
+          { id: 'feed', node: <FeedScreen onOpenEntry={setOpenEntryId} /> },
+          { id: 'map', node: <MapScreen onOpenEntry={setOpenEntryId} /> },
         ]}
       />
       {layer && (
@@ -196,10 +183,19 @@ function App() {
           key={layer}
           code={t('layer.code', { n: String(LAYERS.indexOf(layer) + 1).padStart(2, '0') })}
           title={t(`layer.${layer}`)}
-          onClose={closeLayer}
+          onClose={() => setLayer(null)}
         >
           <Suspense fallback={null}>{layerNode[layer]}</Suspense>
         </Layer>
+      )}
+      {capturing && (
+        <CaptureScreen
+          onClose={() => setCapturing(false)}
+          onSaved={() => {
+            setCapturing(false);
+            setNotice(t('capture.saved'));
+          }}
+        />
       )}
       {openEntryId && (
         <EntryDetail key={openEntryId} entryId={openEntryId} onClose={() => setOpenEntryId(null)} onNavigate={setOpenEntryId} />

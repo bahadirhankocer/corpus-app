@@ -1,47 +1,42 @@
+import { BILINGUAL, PERSONA, STR, TONE, bi } from './context';
 import { callGemini } from './gemini';
-import { SYSTEM_INSTRUCTION } from './prompts';
-import type { Entry } from '../db/types';
+import type { Bi, Entry, QuestionText } from '../db/types';
+import { entryOriginal, loc } from '../i18n/localize';
 
-export interface FollowUpResult {
-  question: string;
-  options: [string, string, string];
-}
-
-const FOLLOWUP_SCHEMA = {
+const QUESTION = {
   type: 'OBJECT',
   properties: {
-    question: { type: 'STRING' },
-    options: {
-      type: 'ARRAY',
-      items: { type: 'STRING' },
-      minItems: 3,
-      maxItems: 3,
-    },
+    question: STR,
+    options: { type: 'ARRAY', items: STR, minItems: 3, maxItems: 3 },
   },
   required: ['question', 'options'],
 };
 
-export async function generateFollowUp(entry: Entry, apiKey: string, model: string): Promise<FollowUpResult> {
-  const source = entry.text || entry.transcript || entry.ai.summary || '';
-  const instructions = `Bu bir fikir defteri girdisi. Görevin, kullanıcının bu fikri kendi içinde daha derin keşfetmesine yardım edecek TEK bir soru üretmek.
+/** One question that opens the entry up from the inside, in both languages. */
+export async function generateFollowUp(entry: Entry, apiKey: string, model: string): Promise<Bi<QuestionText>> {
+  const thread = (entry.thread ?? [])
+    .map((t) => `- Soru: ${loc(t.question, 'tr')} / Cevap: ${loc(t.answer, 'tr')}`)
+    .join('\n');
+
+  const instructions = `Bu bir fikir girdisi. Görevin, onun bu fikri kendi içinde daha derine açmasına yardım edecek TEK bir soru üretmek.
 
 Kurallar:
-- Soru, kullanıcının kendi kelimelerinden ve fikrinden doğmalı; yeni bir konu açma, onun söylediğinin içinde durup derinleş.
-- Soru kısa, doğrudan, tek cümle olmalı. Retorik olmasın, gerçekten cevaplanabilir olsun.
-- Tam olarak 3 kısa cevap seçeneği üret. Bu seçenekler kullanıcının fikri farklı yönlere taşıyabileceği, birbirinden gerçekten ayrışan olası yönler olmalı (aynı şeyin eş anlamlıları olmasın).
-- Soru ve seçenekler girdinin dilinde olsun (Türkçe girdiye Türkçe, İngilizce girdiye İngilizce).
+- Soru onun kendi kelimelerinden ve fikrinden doğsun; yeni bir konu açma, söylediğinin içinde durup derinleş.
+- Daha önce sorulanları tekrar etme; önceki cevapların açtığı kapıdan bir adım ileri git.
+- Soru kısa, doğrudan, tek cümle olsun. Retorik olmasın, gerçekten cevaplanabilir olsun.
+- Tam olarak 3 kısa cevap seçeneği üret; fikri birbirinden gerçekten ayrışan yönlere taşısınlar.
+- ${BILINGUAL}
 
-Girdi: ${source}
+Girdi: ${entryOriginal(entry)}
 ${entry.ai.summary ? `Özet: ${entry.ai.summary}` : ''}
-${entry.ai.categories.length ? `Kategoriler: ${entry.ai.categories.join(', ')}` : ''}`;
+${thread ? `Daha önce sorulanlar ve cevapları:\n${thread}` : ''}`;
 
-  const result = await callGemini<FollowUpResult>({
+  return callGemini<Bi<QuestionText>>({
     apiKey,
     model,
-    systemInstruction: SYSTEM_INSTRUCTION,
+    systemInstruction: `${PERSONA}\n\n${TONE}\nÇıktı yalnızca istenen JSON şemasına uygun olmalı.`,
     parts: [{ text: instructions }],
-    responseSchema: FOLLOWUP_SCHEMA,
+    responseSchema: bi(QUESTION),
+    temperature: 0.8,
   });
-
-  return result;
 }

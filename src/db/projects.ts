@@ -24,7 +24,7 @@ export async function createProject(input: NewProjectInput): Promise<Project> {
 
 export async function updateProject(
   id: string,
-  patch: Partial<NewProjectInput & Pick<Project, 'status' | 'manifesto' | 'procedure' | 'compendium' | 'compendiumUpdatedAt'>>,
+  patch: Partial<NewProjectInput & Pick<Project, 'status' | 'manifesto' | 'procedure'>>,
 ): Promise<void> {
   await db.projects.update(id, patch);
 }

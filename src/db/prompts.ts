@@ -1,16 +1,29 @@
 import { v4 as uuid } from 'uuid';
 
 import { db } from './db';
-import { createEntry } from './entries';
-import { overrideProjectId } from './entries';
-import type { Prompt } from './types';
+import { createEntry, overrideProjectId } from './entries';
+import type { Bi, Prompt, QuestionText } from './types';
 
-export type NewPrompt = Pick<Prompt, 'kind' | 'projectId' | 'context' | 'question' | 'options'>;
+export interface NewPrompt {
+  kind: Prompt['kind'];
+  projectId?: string;
+  text: Bi<QuestionText>;
+}
 
 const EXPIRE_AFTER_MS = 3 * 24 * 60 * 60 * 1000;
 
 export async function createPrompt(input: NewPrompt): Promise<Prompt> {
-  const prompt: Prompt = { id: uuid(), status: 'pending', createdAt: new Date().toISOString(), ...input };
+  const prompt: Prompt = {
+    id: uuid(),
+    kind: input.kind,
+    projectId: input.projectId,
+    context: input.text.tr.context ?? '',
+    question: input.text.tr.question,
+    options: input.text.tr.options,
+    i18n: input.text,
+    status: 'pending',
+    createdAt: new Date().toISOString(),
+  };
   await db.prompts.add(prompt);
   return prompt;
 }
@@ -26,10 +39,16 @@ export async function expireOldPrompts(): Promise<void> {
   await db.prompts.bulkUpdate(stale.map((key) => ({ key, changes: { status: 'skipped' as const } })));
 }
 
-export async function answerPrompt(id: string, answer: string): Promise<void> {
+/** An answer to the AI's own question is a new thought, so it becomes an entry with the question beside it. */
+export async function answerPrompt(id: string, answer: number | string): Promise<void> {
   const prompt = await db.prompts.get(id);
   if (!prompt) return;
-  const entry = await createEntry({ kind: 'text', text: answer, importance: 2, context: prompt.question });
+  const text =
+    typeof answer === 'string' ? answer : (prompt.i18n?.tr.options[answer] ?? prompt.options[answer]);
+  const entry = await createEntry({ kind: 'text', text, importance: 2 });
+  await db.entries.update(entry.id, {
+    promptQuestion: prompt.i18n ? { tr: prompt.i18n.tr.question, en: prompt.i18n.en.question } : prompt.question,
+  });
   if (prompt.projectId) await overrideProjectId(entry.id, prompt.projectId);
   await db.prompts.update(id, { status: 'answered', answerEntryId: entry.id });
 }

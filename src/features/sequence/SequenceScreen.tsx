@@ -16,7 +16,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { draftSequence } from '../../ai/sequence';
-import { ALL_CATEGORIES, CATEGORY_CODES } from '../../constants/categories';
+import { ALL_CATEGORIES, categoryCode } from '../../constants/categories';
 import { effectiveCategories } from '../../db/effective';
 import { useEntriesForProject } from '../../db/entries';
 import { useProjects } from '../../db/projects';
@@ -26,17 +26,19 @@ import type { Category, Entry, Sequence } from '../../db/types';
 import { StyleGuidePrint } from '../export/StyleGuidePrint';
 import { exportVoiceoverScript } from '../export/voiceoverExport';
 import styles from './SequenceScreen.module.css';
+import i18n from '../../i18n';
+import { asLang, entryHeadline } from '../../i18n/localize';
 
 type Section = Sequence['sections'][number];
 
 function entryPreview(entry: Entry): string {
-  return entry.title || entry.text || entry.transcript || entry.ai.summary || '';
+  return entryHeadline(entry, asLang(i18n.language));
 }
 
 function EntryCard({ entry, onOpen }: { entry: Entry; onOpen: () => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: entry.id });
   const cats = effectiveCategories(entry)
-    .map((c) => CATEGORY_CODES[c])
+    .map((c) => categoryCode(c))
     .join(' ');
 
   return (
@@ -200,7 +202,7 @@ export function SequenceScreen({ onOpenEntry }: Props) {
     if (!projectId || !entries || entries.length === 0 || !settings?.geminiApiKey) return;
     setGenerating(true);
     try {
-      const draft = await draftSequence(entries, settings.geminiApiKey, settings.model);
+      const draft = await draftSequence(entries, asLang(i18n.language), settings.geminiApiKey, settings.model);
       const withIds = draft.map((s) => ({ id: crypto.randomUUID(), label: s.label, entryIds: s.entryIds }));
       const placed = new Set(withIds.flatMap((s) => s.entryIds));
       const unplaced = entries.filter((e) => !placed.has(e.id)).map((e) => e.id);

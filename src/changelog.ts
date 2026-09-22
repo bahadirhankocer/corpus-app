@@ -13,6 +13,25 @@ export interface ChangelogRelease {
 /** Newest first. Add a release here whenever `version` in package.json is bumped. */
 export const CHANGELOG: ChangelogRelease[] = [
   {
+    version: '0.3.0',
+    date: '2026-09-22',
+    title: { tr: 'Corpus', en: 'Corpus' },
+    items: [
+      { tr: 'Uygulamanın adı artık Corpus. Adres: bahadirhankocer.github.io/corpus. Veriler ve anahtar yeni adrese kendiliğinden taşınır.', en: 'The app is now called Corpus, at bahadirhankocer.github.io/corpus. Data and the key move to the new address by themselves.' },
+      { tr: 'Açılış ekranı artık Corpus: tüm girdileri tek bir lineer metin olarak okuyan, her girdi ve cevaptan sonra kendini yeniden yazan yaşayan bir metin. Çalışma başlığı, çekirdek paragraf, eksenler ve bir yön.', en: 'The first screen is now Corpus: a living text that reads all entries as one linear body of thought and rewrites itself after every entry and answer. A working title, a core paragraph, axes and a direction.' },
+      { tr: 'Metindeki köprü kelimelere dokununca AI bunu neden düşündüğünü ve hangi girdilerden geldiğini tarih ve saatiyle anlatır.', en: 'Tapping a bridge term shows why the AI connected it and which entries it came from, with date and time.' },
+      { tr: 'Corpus\'un eski sürümleri saklanır, ‹ › ile geriye bakılabilir.', en: 'Earlier versions of the corpus are kept; step back through them with ‹ ›.' },
+      { tr: 'Dosya: video adayı, brief, senaryo, animasyon temaları ve yan fikirler kendiliğinden hazırlanır. Her animasyon teması için AI çalışan bir HTML eskizi yazıp uygulamanın içinde oynatır.', en: 'File: a video candidate, brief, scenario, animation themes and side ideas are prepared by themselves. For every animation theme the AI writes a working HTML sketch that plays inside the app.' },
+      { tr: 'Soru cevapları artık ayrı not değil; sorulan girdinin içinde soru-cevap zinciri olarak durur. Her cevap bir sonraki, daha derin soruyu doğurur. Eski cevaplar taşındı.', en: 'Answers are no longer separate notes; they sit inside the entry that was asked about, as a question-and-answer thread, and each answer earns a deeper question. Existing answers were moved in.' },
+      { tr: 'Düşünceler akışı kaldırıldı. Harita artık kendi sakin sekmesinde. Menü sadeleşti: Audio Log, Ayarlar, Sürümler; Sekans, Bağlantılar ve Özetler Dosya\'nın altında.', en: 'The thoughts stream is gone. The map has its own quiet page. The menu is shorter: Audio Log, Settings, Versions; Sequence, Connections and Digests live under the File.' },
+      { tr: 'Tam çift dil: AI\'ın yazdığı her şey iki dilde saklanır, girdiler çevrilir. Dil değişince her şey birlikte değişir; orijinal metin bir dokunuş uzakta.', en: 'Fully bilingual: everything the AI writes is kept in both languages and entries are translated. Switching language changes everything at once; the original text is one tap away.' },
+      { tr: 'Geri hareketi uygulamayı kapatmak yerine bir önceki ekrana döner. Yazarken geri gitmek yazılanı kaydeder.', en: 'The back gesture returns to the previous screen instead of closing the app. Going back while writing keeps what was written.' },
+      { tr: 'Bildirimler: günde iki "seni dinledim" bildirimi (girdilerinden alıntılı), bir soru, sabah çekirdeği ve her girdiden birkaç saat sonra Corpus\'un nasıl değiştiğini söyleyen bir yankı. Metinler telefonda seçilir, hiçbir girdi dışarı çıkmaz.', en: 'Notifications: two "I listened" notes a day quoting your entries, one question, a morning core, and an echo a few hours after each entry saying how the corpus changed. Texts are chosen on the phone; no entry leaves it.' },
+      { tr: 'Audio Log baştan yazıldı: kendi kendine konuşan bir ses, girdileri tarih ve saatleriyle kronolojik geçer, neyin neyi tetiklediğini ve soru-cevapları anlatıya örer, sonunda bir projeye yönelir. İlk log şimdiye kadarki her şeyi kapsar. Stil düzeltmeleri sessizce yapılır, revizyon gerekmez.', en: 'Audio Log rewritten: a voice talking to itself, walking through entries in order with their dates and times, weaving in what triggered what and the questions and answers, and ending on a direction. The first log covers everything so far. Style fixes happen silently; nothing to revise.' },
+      { tr: 'Günlük özet kaldırıldı; haftalık özet iki dilde yazılır.', en: 'The daily digest was retired; the weekly digest is written in both languages.' },
+    ],
+  },
+  {
     version: '0.2.2',
     date: '2026-09-18',
     title: { tr: 'Büyük harf', en: 'Capital letters' },

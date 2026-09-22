@@ -2,12 +2,12 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuid } from 'uuid';
 
 import { db } from './db';
-import type { Digest } from './types';
+import type { Digest, LocalText } from './types';
 
 export async function createDigest(
   kind: Digest['kind'],
   periodStart: string,
-  body: string,
+  body: LocalText,
   entryIds: string[],
 ): Promise<void> {
   const digest: Digest = {

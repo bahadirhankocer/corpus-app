@@ -1,87 +1,34 @@
 .screen {
   flex: 1;
-  display: flex;
-  flex-direction: column;
   min-height: 0;
-}
-
-.controls {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-2) var(--space-4) var(--space-3);
-}
-
-.select {
-  border: none;
-  background: none;
-  padding: 0;
-  color: var(--color-text);
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 300;
-  letter-spacing: -0.015em;
+  padding: max(var(--space-4), env(safe-area-inset-top)) var(--space-3) var(--space-2);
 }
 
 .canvas {
   flex: 1;
   min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .empty {
-  margin: auto;
-  color: var(--color-text-faint);
-  font-size: 14px;
+  max-width: 16em;
+  margin: 0;
   text-align: center;
-  padding: var(--space-5);
-}
-
-.rationalePanel {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  padding: var(--space-5) var(--space-4);
-  background: var(--color-surface);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.rationaleText {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1.5;
-  color: var(--color-text);
-}
-
-.rationaleActions {
-  display: flex;
-  justify-content: space-between;
-}
-
-.dismissButton {
-  background: none;
-  border: none;
-  padding: 0;
   color: var(--color-text-faint);
-  font-size: 15px;
-  cursor: pointer;
 }
 
-.acceptButton {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--color-text);
-  font-weight: 500;
-  font-size: 15px;
-  cursor: pointer;
-}
-
-.wrapper {
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
+.caption {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
 }

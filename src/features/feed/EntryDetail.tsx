@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { retryEntry } from '../../ai/queue';
+import { kickEnrichment, retryEntry } from '../../ai/queue';
 import { CategoryChips } from '../../components/CategoryChips';
 import { TextChoice } from '../../components/TextChoice';
 import { getAudioBlob } from '../../db/audio';
-import { effectiveCategories, effectiveProjectId, effectiveTags } from '../../db/effective';
+import { effectiveCategories, effectiveProjectId } from '../../db/effective';
 import {
   deleteEntry,
   overrideCategories,
@@ -19,6 +19,7 @@ import { useProjects } from '../../db/projects';
 import type { Category, Entry } from '../../db/types';
 import { formatDateTime } from '../../utils/format';
 import styles from './EntryDetail.module.css';
+import { asLang, entryHeadline, entryView, loc } from '../../i18n/localize';
 
 interface Props {
   entryId: string;
@@ -57,13 +58,18 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [tagsDraft, setTagsDraft] = useState<string | null>(null);
   const [categoriesDraft, setCategoriesDraft] = useState<Category[] | null>(null);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const lang = asLang(i18n.language);
 
   useEffect(() => {
     setCategoriesDraft(null);
     setTagsDraft(null);
+    setShowOriginal(false);
   }, [entryId]);
 
   if (!entry) return null;
+  const view = entryView(entry, lang);
+  const readTranslation = view.translated && !showOriginal;
 
   function handleCategoriesChange(categories: Category[]) {
     setCategoriesDraft(categories);
@@ -71,7 +77,8 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
   }
 
   function handleField<K extends keyof Pick<Entry, 'text' | 'title' | 'context'>>(field: K, value: string) {
-    void updateEntry(entryId, { [field]: value } as Pick<Entry, K>);
+    if ((entry?.[field] ?? '') === value) return;
+    void updateEntry(entryId, { [field]: value } as Pick<Entry, K>).then(() => kickEnrichment());
   }
 
   function handleImportance(value: 1 | 2 | 3) {
@@ -96,11 +103,26 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
       <div className={styles.body}>
         <div className={styles.meta}>
           {formatDateTime(entry.createdAt, i18n.language)} · {t(`feed.aiStatus.${entry.ai.status}`)}
+          {view.translated && (
+            <>
+              {' · '}
+              <button type="button" className={styles.inlineToggle} onClick={() => setShowOriginal((v) => !v)}>
+                {showOriginal ? t('detail.showTranslation') : t('detail.showOriginal')}
+              </button>
+            </>
+          )}
         </div>
+
+        {entry.promptQuestion && (
+          <div className={styles.field}>
+            <span className={styles.label}>{t('detail.answerTo')}</span>
+            <span className={styles.question}>{loc(entry.promptQuestion, lang)}</span>
+          </div>
+        )}
 
         {parent && (
           <button type="button" className={styles.threadLink} onClick={() => onNavigate(parent.id)}>
-            ← {parent.title || parent.text || parent.transcript || t('feed.voicePlaceholder')}
+            ← {entryHeadline(parent, lang) || t('feed.voicePlaceholder')}
           </button>
         )}
 
@@ -125,19 +147,26 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
           </div>
         )}
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="detail-title">
-            {t('capture.titleLabel')}
-          </label>
-          <input
-            id="detail-title"
-            className={styles.input}
-            defaultValue={entry.title ?? ''}
-            onBlur={(e) => handleField('title', e.target.value)}
-          />
-        </div>
+        {readTranslation ? (
+          <div className={styles.field}>
+            {view.title && <span className={styles.readTitle}>{view.title}</span>}
+            <p className={styles.readText}>{view.text}</p>
+          </div>
+        ) : (
+          <div className={styles.field}>
+            <label className={styles.label} htmlFor="detail-title">
+              {t('capture.titleLabel')}
+            </label>
+            <input
+              id="detail-title"
+              className={styles.input}
+              defaultValue={entry.title ?? ''}
+              onBlur={(e) => handleField('title', e.target.value)}
+            />
+          </div>
+        )}
 
-        {entry.kind === 'text' && (
+        {!readTranslation && entry.kind === 'text' && (
           <div className={styles.field}>
             <label className={styles.label} htmlFor="detail-text">
               {t('capture.textLabel')}
@@ -151,7 +180,7 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
           </div>
         )}
 
-        {entry.kind === 'voice' && (
+        {!readTranslation && entry.kind === 'voice' && (
           <div className={styles.field}>
             <span className={styles.label}>{t('detail.transcript')}</span>
             <span>{entry.transcript ?? t('detail.noTranscriptYet')}</span>
@@ -168,10 +197,24 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
           </div>
         )}
 
-        {entry.ai.summary && (
+        {view.thread.length > 0 && (
+          <div className={styles.field}>
+            <span className={styles.label}>{t('detail.thread')}</span>
+            <ol className={styles.thread}>
+              {view.thread.map((item, i) => (
+                <li key={i} className={styles.threadItem}>
+                  <span className={styles.threadQuestion}>{item.question}</span>
+                  <span className={styles.threadAnswer}>{item.answer}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {view.summary && (
           <div className={styles.field}>
             <span className={styles.label}>{t('detail.aiSummary')}</span>
-            <span>{entry.ai.summary}</span>
+            <span>{view.summary}</span>
           </div>
         )}
 
@@ -209,7 +252,7 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
           <input
             id="detail-tags"
             className={styles.input}
-            value={tagsDraft ?? effectiveTags(entry).join(', ')}
+            value={tagsDraft ?? view.tags.join(', ')}
             onChange={(e) => setTagsDraft(e.target.value)}
             onBlur={(e) => {
               overrideTags(
@@ -257,7 +300,7 @@ export function EntryDetail({ entryId, onClose, onNavigate }: Props) {
                 className={styles.threadLink}
                 onClick={() => onNavigate(child.id)}
               >
-                {child.title || child.text || child.transcript || t('feed.voicePlaceholder')}
+                {entryHeadline(child, lang) || t('feed.voicePlaceholder')}
               </button>
             ))}
           </div>

@@ -3,15 +3,18 @@ import Dexie, { type EntityTable } from 'dexie';
 import type {
   AudioBlob,
   AudioLog,
+  CorpusDoc,
   Digest,
+  Dossier,
   Entry,
   FollowUp,
   Link,
+  Note,
   Project,
   Prompt,
   Sequence,
   Settings,
-  Thought,
+  Sketch,
 } from './types';
 
 export class CorpusDb extends Dexie {
@@ -24,13 +27,16 @@ export class CorpusDb extends Dexie {
   audioLogs!: EntityTable<AudioLog, 'id'>;
   settings!: EntityTable<Settings, 'id'>;
   followups!: EntityTable<FollowUp, 'id'>;
-  thoughts!: EntityTable<Thought, 'id'>;
   prompts!: EntityTable<Prompt, 'id'>;
+  corpora!: EntityTable<CorpusDoc, 'id'>;
+  dossiers!: EntityTable<Dossier, 'id'>;
+  sketches!: EntityTable<Sketch, 'key'>;
+  notes!: EntityTable<Note, 'id'>;
 
   constructor() {
-    super('corpus-app');
+    super('corpus');
     this.version(1).stores({
-      entries: 'id, createdAt, kind, importance, ai.status, ai.projectId',
+      entries: 'id, createdAt, kind, importance, ai.status, ai.projectId, parentEntryId',
       audioBlobs: 'id',
       projects: 'id, status',
       links: 'id, fromId, toId, state',
@@ -38,22 +44,13 @@ export class CorpusDb extends Dexie {
       digests: 'id, kind, periodStart',
       audioLogs: 'id, number, weekStart, status',
       settings: 'id',
-    });
-    this.version(2).stores({
-      entries: 'id, createdAt, kind, importance, ai.status, ai.projectId, parentEntryId',
       followups: 'id, entryId, status, createdAt',
+      prompts: 'id, status, projectId, createdAt',
+      corpora: 'id, createdAt',
+      dossiers: 'id, createdAt',
+      sketches: 'key',
+      notes: 'id, kind, createdAt',
     });
-    this.version(3)
-      .stores({
-        thoughts: 'id, projectId, createdAt',
-        prompts: 'id, status, projectId, createdAt',
-      })
-      .upgrade(async (tx) => {
-        // The redesigned app is black-first; 'system' meant "whatever the phone says".
-        await tx.table('settings').toCollection().modify((s: { theme?: string }) => {
-          if (s.theme === 'system') s.theme = 'dark';
-        });
-      });
   }
 }
 

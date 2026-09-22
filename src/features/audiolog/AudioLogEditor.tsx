@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { rewriteFlaggedParagraphs } from '../../ai/audiolog';
 import { TextChoice } from '../../components/TextChoice';
-import { lintAudioLogDraft, lintParagraphText } from '../../audiolog/lint';
 import { setAudioLogStatus, updateAudioLog, useAudioLog } from '../../db/audiologs';
 import { updateSettings, useSettings } from '../../db/settings';
 import type { AudioLog } from '../../db/types';
 import { downloadTextFile } from '../../utils/download';
+import { useBackHandler } from '../../app/backStack';
 import styles from './AudioLogEditor.module.css';
 import { ReadingMode } from './ReadingMode';
 
@@ -21,7 +20,7 @@ function buildMarkdown(log: AudioLog): string {
   for (const p of log.paragraphs) {
     lines.push(p.text);
     if (p.cue) lines.push(`[${p.cue}]`);
-    lines.push(`(kaynak: ${p.sourceEntryIds.join(', ')})`, '');
+    lines.push('');
   }
   return lines.join('\n');
 }
@@ -34,8 +33,8 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
   const { t } = useTranslation();
   const log = useAudioLog(audioLogId);
   const settings = useSettings();
-  const [rewritingIndex, setRewritingIndex] = useState<number | null>(null);
   const [reading, setReading] = useState(false);
+  useBackHandler(true, onClose);
 
   if (!log) return null;
 
@@ -56,31 +55,6 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
     await setAudioLogStatus(audioLogId, status);
     if (status === 'final' && log!.status !== 'final' && settings) {
       await updateSettings({ audioLog: { ...settings.audioLog, nextNumber: settings.audioLog.nextNumber + 1 } });
-    }
-  }
-
-  async function handleRewrite(index: number) {
-    if (!settings?.geminiApiKey || !log) return;
-    setRewritingIndex(index);
-    try {
-      const paragraph = log.paragraphs[index];
-      const issues = lintParagraphText(paragraph.text, log.lang);
-      const rewrites = await rewriteFlaggedParagraphs(
-        [{ index, text: paragraph.text, issues: issues.length > 0 ? issues : [t('audiolog.improveGeneric')] }],
-        settings.styleGuide,
-        log.lang,
-        settings.geminiApiKey,
-        settings.model,
-      );
-      const newText = rewrites.get(index);
-      if (newText) {
-        const paragraphs = log.paragraphs.map((p, i) => (i === index ? { ...p, text: newText } : p));
-        const targetWords = settings.audioLog.targetMinutes * settings.audioLog.wordsPerMinute;
-        const { warnings, errors } = lintAudioLogDraft(paragraphs, log.lang, targetWords);
-        await updateAudioLog(audioLogId, { paragraphs, lintWarnings: [...errors, ...warnings] });
-      }
-    } finally {
-      setRewritingIndex(null);
     }
   }
 
@@ -129,16 +103,6 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
           onChange={handleStatus}
         />
 
-        {log.lintWarnings.length > 0 && (
-          <div className={styles.warnings}>
-            {log.lintWarnings.map((w, i) => (
-              <span key={i} className={styles.warningLine}>
-                {w}
-              </span>
-            ))}
-          </div>
-        )}
-
         <div className={styles.field}>
           <span className={styles.label}>{t('audiolog.paragraphs')}</span>
           {log.paragraphs.map((p, i) => (
@@ -152,14 +116,7 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
                 <span className={styles.sources}>
                   {t('audiolog.sourceCount', { count: p.sourceEntryIds.length })}
                 </span>
-                <button
-                  type="button"
-                  className={styles.rewriteButton}
-                  disabled={rewritingIndex === i}
-                  onClick={() => handleRewrite(i)}
-                >
-                  {rewritingIndex === i ? t('sequence.generating') : t('audiolog.rewrite')}
-                </button>
+                {p.cue && <span className={styles.sources}>[{p.cue}]</span>}
               </div>
             </div>
           ))}

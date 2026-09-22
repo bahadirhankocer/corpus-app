@@ -7,6 +7,8 @@ import { db } from '../../db/db';
 import { updateProject } from '../../db/projects';
 import { ensureSettings } from '../../db/settings';
 import styles from './ProjectInterview.module.css';
+import type { Bi } from '../../db/types';
+import { asLang, loc } from '../../i18n/localize';
 
 interface Props {
   projectId: string;
@@ -20,13 +22,14 @@ type Phase = 'asking' | 'composing' | 'done' | 'error';
  * manifesto and the AI's working procedure inside it.
  */
 export function ProjectInterview({ projectId, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = asLang(i18n.language);
   const [turns, setTurns] = useState<InterviewTurn[]>([]);
   const [current, setCurrent] = useState<InterviewQuestion | null>(null);
   const [phase, setPhase] = useState<Phase>('asking');
   const [writing, setWriting] = useState(false);
   const [draft, setDraft] = useState('');
-  const [result, setResult] = useState<{ manifesto: string; procedure: string } | null>(null);
+  const [result, setResult] = useState<{ manifesto: Bi; procedure: Bi } | null>(null);
   const [name, setName] = useState('');
   const started = useRef(false);
 
@@ -45,6 +48,7 @@ export function ProjectInterview({ projectId, onClose }: Props) {
           name: project.name,
           description: project.description,
           turns: history,
+          lang,
           styleGuide: settings.styleGuide,
           apiKey: settings.geminiApiKey,
           model: settings.model,
@@ -54,7 +58,7 @@ export function ProjectInterview({ projectId, onClose }: Props) {
         } else {
           setPhase('composing');
           const composed = await composeProjectProcedure(common);
-          await updateProject(projectId, { manifesto: composed.manifesto.trim(), procedure: composed.procedure.trim() });
+          await updateProject(projectId, { manifesto: composed.manifesto, procedure: composed.procedure });
           setResult(composed);
           setPhase('done');
         }
@@ -62,7 +66,7 @@ export function ProjectInterview({ projectId, onClose }: Props) {
         setPhase('error');
       }
     },
-    [projectId],
+    [projectId, lang],
   );
 
   useEffect(() => {
@@ -127,10 +131,10 @@ export function ProjectInterview({ projectId, onClose }: Props) {
 
         {phase === 'done' && result && (
           <div className={styles.result}>
-            <span className={styles.micro}>{t('atelier.manifesto')}</span>
-            <p className={styles.resultText}>{result.manifesto}</p>
+            <span className={styles.micro}>{t('dossier.manifesto')}</span>
+            <p className={styles.resultText}>{loc(result.manifesto, lang)}</p>
             <span className={styles.micro}>{t('interview.procedure')}</span>
-            <p className={styles.resultText}>{result.procedure}</p>
+            <p className={styles.resultText}>{loc(result.procedure, lang)}</p>
           </div>
         )}
 
