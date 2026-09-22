@@ -19,7 +19,7 @@ npx wrangler deploy
 Wrangler prints the Worker URL, for example `https://corpus-push.<your-subdomain>.workers.dev`. Put it in `src/config.ts` (`DEFAULT_PUSH_WORKER_URL`); it is public and safe to commit. Alternatively, pass it once through a setup link:
 
 ```
-https://bahadirhankocer.github.io/corpus/#w=https://corpus-push.<your-subdomain>.workers.dev
+https://bahadirhankocer.github.io/corpus-app/#w=https://corpus-push.<your-subdomain>.workers.dev
 ```
 
 Then turn on Settings → Notifications and send a test notification.

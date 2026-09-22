@@ -23,7 +23,7 @@ Everything the AI writes is stored in Turkish and English, and entries are trans
 The key is never committed or built into the app. Enter it once per device, in Settings → AI or by opening a one-time setup link:
 
 ```
-https://bahadirhankocer.github.io/corpus/#k=<gemini key>
+https://bahadirhankocer.github.io/corpus-app/#k=<gemini key>
 ```
 
 The part after `#` is never sent to any server. The app stores the key in IndexedDB on the device and removes it from the address bar immediately. Settings → AI can copy a ready-made setup link for another device.

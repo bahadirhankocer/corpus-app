@@ -17,7 +17,7 @@ export const CHANGELOG: ChangelogRelease[] = [
     date: '2026-09-22',
     title: { tr: 'Corpus', en: 'Corpus' },
     items: [
-      { tr: 'Uygulamanın adı artık Corpus. Adres: bahadirhankocer.github.io/corpus. Veriler ve anahtar yeni adrese kendiliğinden taşınır.', en: 'The app is now called Corpus, at bahadirhankocer.github.io/corpus. Data and the key move to the new address by themselves.' },
+      { tr: 'Uygulamanın adı artık Corpus. Adres: bahadirhankocer.github.io/corpus-app. Veriler ve anahtar yeni adrese kendiliğinden taşınır.', en: 'The app is now called Corpus, at bahadirhankocer.github.io/corpus-app. Data and the key move to the new address by themselves.' },
       { tr: 'Açılış ekranı artık Corpus: tüm girdileri tek bir lineer metin olarak okuyan, her girdi ve cevaptan sonra kendini yeniden yazan yaşayan bir metin. Çalışma başlığı, çekirdek paragraf, eksenler ve bir yön.', en: 'The first screen is now Corpus: a living text that reads all entries as one linear body of thought and rewrites itself after every entry and answer. A working title, a core paragraph, axes and a direction.' },
       { tr: 'Metindeki köprü kelimelere dokununca AI bunu neden düşündüğünü ve hangi girdilerden geldiğini tarih ve saatiyle anlatır.', en: 'Tapping a bridge term shows why the AI connected it and which entries it came from, with date and time.' },
       { tr: 'Corpus\'un eski sürümleri saklanır, ‹ › ile geriye bakılabilir.', en: 'Earlier versions of the corpus are kept; step back through them with ‹ ›.' },
