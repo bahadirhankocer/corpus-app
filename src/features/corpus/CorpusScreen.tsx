@@ -83,7 +83,8 @@ function CorpusText({ doc, lang, onBridge }: { doc: CorpusDoc; lang: Lang; onBri
 export function CorpusScreen({ onOpenEntry, onOpenLayer, onOpenQuestion, onCapture }: Props) {
   const { t, i18n } = useTranslation();
   const lang = asLang(i18n.language);
-  const { state } = useAiStatus();
+  const { state, lastError } = useAiStatus();
+  const [requested, setRequested] = useState(false);
   const settings = useSettings();
   const versions = useCorpusVersions();
   const entries = useEntries();
@@ -95,6 +96,16 @@ export function CorpusScreen({ onOpenEntry, onOpenLayer, onOpenQuestion, onCaptu
   const aiReady = Boolean(settings?.aiEnabled && settings.geminiApiKey);
   const waiting = questions?.length ?? 0;
   const hasEntries = (entries?.length ?? 0) > 0;
+  const processed = entries?.filter((e) => e.ai.status === 'done').length ?? 0;
+  const failed = entries?.filter((e) => e.ai.status === 'error').length ?? 0;
+  const errorText = lastError
+    ? t(`corpus.error.${['quota-day', 'quota-minute', 'offline', 'key', 'timeout'].includes(lastError) ? lastError : 'other'}`, { detail: lastError })
+    : null;
+
+  function writeNow() {
+    setRequested(true);
+    void refreshCorpus({ force: true }).finally(() => setRequested(false));
+  }
   const total = versions?.length ?? 0;
 
   return (
@@ -149,16 +160,27 @@ export function CorpusScreen({ onOpenEntry, onOpenLayer, onOpenQuestion, onCaptu
               {!aiReady ? t('corpus.noKey') : hasEntries ? t('corpus.writing') : t('corpus.empty')}
             </p>
             {aiReady && hasEntries && (
-              <button type="button" className={styles.textButton} onClick={() => void refreshCorpus({ force: true })}>
-                {t('corpus.writeNow')}
+              <p className={styles.micro}>
+                {t('corpus.progress', { done: processed, total: entries?.length ?? 0 })}
+                {failed > 0 && <> · {t('corpus.failed', { count: failed })}</>}
+                {' · '}
+                {t(`aiState.${state}`)}
+              </p>
+            )}
+            {errorText && <p className={styles.errorText}>{errorText}</p>}
+            {aiReady && hasEntries && (
+              <button type="button" className={styles.textButton} disabled={requested} onClick={writeNow}>
+                {requested ? t('corpus.thinking') : t('corpus.writeNow')}
               </button>
             )}
           </div>
         )}
 
+        {doc && errorText && <p className={styles.errorText}>{errorText}</p>}
+
         {doc && versionIndex === 0 && (
-          <button type="button" className={styles.rewrite} onClick={() => void refreshCorpus({ force: true })}>
-            {t('corpus.rewrite')}
+          <button type="button" className={styles.rewrite} disabled={requested} onClick={writeNow}>
+            {requested ? t('corpus.thinking') : t('corpus.rewrite')}
           </button>
         )}
 

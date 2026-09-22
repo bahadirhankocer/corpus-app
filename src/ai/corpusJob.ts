@@ -1,6 +1,6 @@
 import { writeCorpus } from './corpus';
 import { writeDossier } from './dossier';
-import { aiJobDone, aiJobQueued } from './status';
+import { aiJobDone, aiJobQueued, aiReportError } from './status';
 import { addNotes, latestCorpus, latestDossier, saveCorpus, saveDossier, setMorningNote } from '../db/corpus';
 import { db } from '../db/db';
 import { ensureSettings } from '../db/settings';
@@ -54,8 +54,14 @@ export async function refreshCorpus(options: { force?: boolean } = {}): Promise<
   const settings = await ensureSettings();
   if (!settings.aiEnabled || !settings.geminiApiKey || !navigator.onLine) return;
 
-  const busy = await db.entries.where('ai.status').anyOf('pending', 'processing').count();
-  if (busy > 0) {
+  // Wait briefly for entries that are being classified right now, but never for long and never when forced.
+  const recent = Date.now() - 3 * 60 * 1000;
+  const busy = await db.entries
+    .where('ai.status')
+    .anyOf('pending', 'processing')
+    .filter((e) => new Date(e.updatedAt).getTime() > recent)
+    .count();
+  if (busy > 0 && !options.force) {
     scheduleCorpus();
     return;
   }
@@ -113,12 +119,24 @@ export async function refreshCorpus(options: { force?: boolean } = {}): Promise<
       });
       await saveDossier({ ...next, entryCount: done.length });
     }
-  } catch {
-    // the next change or tick tries again
+    aiReportError(undefined);
+  } catch (err) {
+    // the next change or tick tries again; meanwhile the corpus screen says what went wrong
+    aiReportError(describeError(err));
   } finally {
     running = false;
     aiJobDone();
   }
+}
+
+function describeError(err: unknown): string {
+  const message = err instanceof Error ? err.message : String(err);
+  if (message === 'daily quota') return 'quota-day';
+  if (message === 'rate limited') return 'quota-minute';
+  if (err instanceof DOMException && err.name === 'TimeoutError') return 'timeout';
+  if (err instanceof TypeError || !navigator.onLine) return 'offline';
+  if (/API key|API_KEY|PERMISSION_DENIED|40[13]/.test(message)) return 'key';
+  return message.slice(0, 160);
 }
 
 export async function refreshDossier(): Promise<void> {

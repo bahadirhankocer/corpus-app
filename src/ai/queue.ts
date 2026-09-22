@@ -5,6 +5,7 @@ import { GeminiRateLimitError } from './gemini';
 import { findLinks } from './links';
 import { translateEntry } from './translate';
 import { getAudioBlob } from '../db/audio';
+import { latestCorpus } from '../db/corpus';
 import { db } from '../db/db';
 import { createFollowUp } from '../db/followups';
 import { createSuggestedLink } from '../db/links';
@@ -64,8 +65,9 @@ async function enrichOne(): Promise<'done' | 'empty' | 'retry'> {
   if (!settings.aiEnabled || !settings.geminiApiKey || !navigator.onLine) return 'retry';
 
   const done = (await db.entries.where('ai.status').equals('done').toArray()).filter((e) => !skipped.has(e.id));
-  const entry =
-    done.find((e) => e.ai.enriched === false) ?? done.find((e) => e.i18nFor !== entrySignature(e));
+  // Older entries are translated only once a first corpus exists, so that text is never kept waiting.
+  const backfill = (await latestCorpus()) ? done.find((e) => e.i18nFor !== entrySignature(e)) : undefined;
+  const entry = done.find((e) => e.ai.enriched === false) ?? backfill;
   if (!entry) return 'empty';
 
   const { geminiApiKey: apiKey, model } = settings;
@@ -165,6 +167,8 @@ export async function kickAiQueue(): Promise<void> {
   if (running) return;
   running = true;
   try {
+    // Nothing is being processed right now, so anything marked as processing was cut off when the app closed.
+    await db.entries.where('ai.status').equals('processing').modify({ 'ai.status': 'pending' });
     for (;;) {
       const outcome = await processOne();
       if (outcome === 'empty' || outcome === 'skipped') break;

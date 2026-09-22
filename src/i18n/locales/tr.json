@@ -45,7 +45,17 @@
     "writeNow": "Şimdi yaz",
     "rewrite": "Yeniden yaz",
     "bridge": "Neden bağladım",
-    "capture": "Yeni girdi"
+    "capture": "Yeni girdi",
+    "progress": "{{done}}/{{total}} girdi işlendi",
+    "failed": "{{count}} hatalı",
+    "error": {
+      "quota-day": "Gemini'nin bugünkü ücretsiz kotası doldu. Corpus kota yenilenince (gece yarısı, Pasifik saati) kendiliğinden yazılır.",
+      "quota-minute": "Gemini dakikalık sınıra takıldı. Birkaç dakika içinde kendiliğinden yeniden deneyecek.",
+      "offline": "İnternet bağlantısı yok. Bağlantı gelince devam eder.",
+      "key": "Gemini anahtarı reddedildi. Ayarlar'dan anahtarı kontrol et.",
+      "other": "Son deneme başarısız oldu: {{detail}}",
+      "timeout": "Gemini zamanında cevap vermedi. Birazdan kendiliğinden yeniden deneyecek."
+    }
   },
   "dossier": {
     "title": "Dosya",

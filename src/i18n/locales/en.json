@@ -45,7 +45,17 @@
     "writeNow": "Write now",
     "rewrite": "Rewrite",
     "bridge": "Why I connected this",
-    "capture": "New entry"
+    "capture": "New entry",
+    "progress": "{{done}}/{{total}} entries processed",
+    "failed": "{{count}} failed",
+    "error": {
+      "quota-day": "Gemini's free quota for today is used up. Corpus writes itself once it resets (midnight, Pacific time).",
+      "quota-minute": "Gemini hit its per-minute limit. It will try again by itself in a few minutes.",
+      "offline": "No internet connection. It continues once you are back online.",
+      "key": "The Gemini key was rejected. Check it in Settings.",
+      "other": "The last attempt failed: {{detail}}",
+      "timeout": "Gemini did not answer in time. It will try again by itself shortly."
+    }
   },
   "dossier": {
     "title": "File",

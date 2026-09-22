@@ -33,6 +33,7 @@ export async function blobToBase64(blob: Blob): Promise<string> {
 // per-minute quota is respected, and a 429 pauses the whole gate instead of failing the job.
 const MIN_GAP_MS = 4500;
 const MAX_RETRIES = 3;
+const REQUEST_TIMEOUT_MS = 150_000;
 let chain: Promise<unknown> = Promise.resolve();
 let lastCallAt = 0;
 let cooldownUntil = 0;
@@ -55,7 +56,12 @@ async function gated<T>(fn: () => Promise<T>): Promise<T> {
         try {
           return await fn();
         } catch (err) {
-          const transient = err instanceof GeminiRateLimitError || (err instanceof GeminiApiError && /Gemini API 5\d\d/.test(err.message));
+          const dailyQuota = err instanceof GeminiRateLimitError && err.message === 'daily quota';
+          const transient =
+            !dailyQuota &&
+            (err instanceof GeminiRateLimitError ||
+              (err instanceof DOMException && err.name === 'TimeoutError') ||
+              (err instanceof GeminiApiError && /Gemini API 5\d\d/.test(err.message)));
           if (!transient || attempt >= MAX_RETRIES) throw err;
           cooldownUntil = Date.now() + 15000 * 2 ** attempt;
         }
@@ -74,6 +80,8 @@ export async function callGemini<T>(req: GeminiRequest): Promise<T> {
   const doCall = (): Promise<string> =>
     gated(async () => {
       const res = await fetch(url, {
+        // A request that hangs on a flaky mobile connection must not block every job behind it.
+        signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -88,7 +96,8 @@ export async function callGemini<T>(req: GeminiRequest): Promise<T> {
       });
 
       if (res.status === 429) {
-        throw new GeminiRateLimitError('rate limited');
+        const body = await res.text().catch(() => '');
+        throw new GeminiRateLimitError(/per.?day|PerDay|daily/i.test(body) ? 'daily quota' : 'rate limited');
       }
       if (!res.ok) {
         const body = await res.text().catch(() => '');

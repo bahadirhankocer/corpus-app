@@ -13,6 +13,18 @@ export interface ChangelogRelease {
 /** Newest first. Add a release here whenever `version` in package.json is bumped. */
 export const CHANGELOG: ChangelogRelease[] = [
   {
+    version: '0.3.1',
+    date: '2026-09-22',
+    title: { tr: 'Corpus takılmaları', en: 'Corpus stalls' },
+    items: [
+      { tr: 'Uygulama kapanırken yarıda kalan bir girdi artık Corpus\'u beklemede bırakmıyor; bir sonraki açılışta kendiliğinden yeniden işleniyor.', en: 'An entry cut off when the app closed no longer keeps the corpus waiting; it is processed again on the next start.' },
+      { tr: '"Şimdi yaz" artık hiçbir şeyi beklemeden hemen yazar.', en: '"Write now" now writes immediately, without waiting for anything.' },
+      { tr: 'İlk metin, eski girdilerin çevirilerinden önce yazılır.', en: 'The first text is written before older entries are translated.' },
+      { tr: 'Corpus ekranı kaç girdinin işlendiğini ve bir sorun varsa ne olduğunu gösterir (kota, bağlantı, anahtar).', en: 'The corpus screen shows how many entries are processed and, if something is wrong, what (quota, connection, key).' },
+      { tr: 'Asılı kalan bir AI isteği artık diğer işleri durdurmuyor.', en: 'A hanging AI request no longer stops every other job.' },
+    ],
+  },
+  {
     version: '0.3.0',
     date: '2026-09-22',
     title: { tr: 'Corpus', en: 'Corpus' },

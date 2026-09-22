@@ -5,6 +5,8 @@ export type AiState = 'idle' | 'thinking' | 'waiting';
 interface Snapshot {
   state: AiState;
   callsToday: number;
+  /** the last failure of a background job, cleared by the next success */
+  lastError?: string;
 }
 
 const COUNT_KEY = 'corpus.aiCalls';
@@ -50,6 +52,10 @@ export function aiJobDone(): void {
 export function aiSetWaiting(value: boolean): void {
   waiting = value;
   recompute();
+}
+
+export function aiReportError(message: string | undefined): void {
+  if (message !== snapshot.lastError) emit({ ...snapshot, lastError: message });
 }
 
 export function aiCallMade(): void {

@@ -453,3 +453,17 @@
     animation: none;
   }
 }
+
+.errorText {
+  margin: 0;
+  max-width: 30em;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-warning);
+}
+
+.textButton:disabled,
+.rewrite:disabled {
+  color: var(--color-text-faint);
+  cursor: default;
+}
