@@ -9,4 +9,4 @@ export const DEFAULT_PUSH_WORKER_URL = 'https://corpus-push.bahadirhankocer.work
  * A web client ID is public by design; it can be committed. Empty means the text is copied and a blank
  * document is opened instead.
  */
-export const GOOGLE_CLIENT_ID = '';
+export const GOOGLE_CLIENT_ID = '861420150053-5c9gv9u3d54ra8o05m63gnqo1grhvkbd.apps.googleusercontent.com';
