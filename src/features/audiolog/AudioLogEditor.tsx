@@ -1,23 +1,32 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { AutoText } from '../../components/AutoText';
 import { TextChoice } from '../../components/TextChoice';
 import { setAudioLogStatus, updateAudioLog, useAudioLog } from '../../db/audiologs';
 import { updateSettings, useSettings } from '../../db/settings';
-import type { AudioLog } from '../../db/types';
+import type { AudioLog, Lang } from '../../db/types';
+import { asLang, audioLogView, upper } from '../../i18n/localize';
+import type { AudioLogView } from '../../i18n/localize';
 import { downloadTextFile } from '../../utils/download';
 import { useBackHandler } from '../../app/backStack';
+import { saveAudioLogToDocs, useDocsStatus } from '../export/googleDocs';
 import styles from './AudioLogEditor.module.css';
 import { ReadingMode } from './ReadingMode';
+import { useAudioLogTranslation } from './translateAudioLog';
 
 interface Props {
   audioLogId: string;
   onClose: () => void;
 }
 
-function buildMarkdown(log: AudioLog): string {
-  const lines = [`# AUDIO LOG ${String(log.number).padStart(3, '0')} — ${log.title}`, ''];
-  for (const p of log.paragraphs) {
+function logNumber(log: AudioLog): string {
+  return String(log.number).padStart(3, '0');
+}
+
+function buildMarkdown(log: AudioLog, view: AudioLogView): string {
+  const lines = [`# AUDIO LOG ${logNumber(log)} — ${view.title}`, ''];
+  for (const p of view.paragraphs) {
     lines.push(p.text);
     if (p.cue) lines.push(`[${p.cue}]`);
     lines.push('');
@@ -25,30 +34,48 @@ function buildMarkdown(log: AudioLog): string {
   return lines.join('\n');
 }
 
-function buildTxt(log: AudioLog): string {
-  return log.paragraphs.map((p) => p.text).join('\n\n');
+function period(log: AudioLog, lang: Lang): string {
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-GB', { day: 'numeric', month: 'long' });
+  return `${fmt(log.weekStart)} – ${fmt(log.rangeEnd ?? log.createdAt)}`;
 }
 
 export function AudioLogEditor({ audioLogId, onClose }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = asLang(i18n.language);
   const log = useAudioLog(audioLogId);
   const settings = useSettings();
+  const docs = useDocsStatus();
   const [reading, setReading] = useState(false);
   useBackHandler(true, onClose);
+  const view = log ? audioLogView(log, lang) : undefined;
+  useAudioLogTranslation(log, lang, Boolean(view?.needsTranslation));
 
-  if (!log) return null;
+  if (!log || !view) return null;
 
-  function handleTitle(value: string) {
-    void updateAudioLog(audioLogId, { title: value });
-  }
-
-  function handlePatreonIntro(value: string) {
-    void updateAudioLog(audioLogId, { patreonIntro: value });
-  }
-
-  function handleParagraphText(index: number, value: string) {
-    const paragraphs = log!.paragraphs.map((p, i) => (i === index ? { ...p, text: value } : p));
-    void updateAudioLog(audioLogId, { paragraphs });
+  /** Edits go to whatever is on screen: the original, or its translation. */
+  function edit(change: { title?: string; patreonIntro?: string; paragraph?: { index: number; text: string } }) {
+    const { title, patreonIntro, paragraph } = change;
+    if (view!.translated) {
+      const current = log!.translations![lang]!;
+      const next = {
+        ...current,
+        title: title ?? current.title,
+        patreonIntro: patreonIntro ?? current.patreonIntro,
+        paragraphs: paragraph
+          ? current.paragraphs.map((p, i) => (i === paragraph.index ? { ...p, text: paragraph.text } : p))
+          : current.paragraphs,
+      };
+      void updateAudioLog(audioLogId, { translations: { ...log!.translations, [lang]: next } });
+      return;
+    }
+    void updateAudioLog(audioLogId, {
+      ...(title !== undefined && { title }),
+      ...(patreonIntro !== undefined && { patreonIntro }),
+      ...(paragraph && {
+        paragraphs: log!.paragraphs.map((p, i) => (i === paragraph.index ? { ...p, text: paragraph.text } : p)),
+      }),
+    });
   }
 
   async function handleStatus(status: AudioLog['status']) {
@@ -59,19 +86,15 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
   }
 
   function handleExportMd() {
-    downloadTextFile(`AUDIO-LOG-${String(log!.number).padStart(3, '0')}-${log!.title}.md`, buildMarkdown(log!), 'text/markdown');
-  }
-
-  function handleExportTxt() {
-    downloadTextFile(`AUDIO-LOG-${String(log!.number).padStart(3, '0')}-${log!.title}.txt`, buildTxt(log!), 'text/plain');
+    downloadTextFile(`AUDIO-LOG-${logNumber(log!)}-${view!.title}.md`, buildMarkdown(log!, view!), 'text/markdown');
   }
 
   function handleExportPatreon() {
-    downloadTextFile(`AUDIO-LOG-${String(log!.number).padStart(3, '0')}-patreon.txt`, log!.patreonIntro, 'text/plain');
+    downloadTextFile(`AUDIO-LOG-${logNumber(log!)}-patreon.txt`, view!.patreonIntro, 'text/plain');
   }
 
   if (reading) {
-    return <ReadingMode audioLog={log} onClose={() => setReading(false)} />;
+    return <ReadingMode paragraphs={view.paragraphs} onClose={() => setReading(false)} />;
   }
 
   return (
@@ -84,11 +107,19 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
           {t('audiolog.readingMode')}
         </button>
       </div>
+
       <div className={styles.body}>
-        <input
-          className={styles.titleInput}
-          value={log.title}
-          onChange={(e) => handleTitle(e.target.value)}
+        <div className={styles.meta}>
+          <span>AUDIO LOG {logNumber(log)}</span>
+          <span>{period(log, lang)}</span>
+          {view.needsTranslation && <span className={styles.translating}>{t('audiolog.translating')}</span>}
+        </div>
+
+        <AutoText
+          className={styles.title}
+          value={view.title}
+          onChange={(value) => edit({ title: upper(value) })}
+          spellCheck={false}
         />
 
         <TextChoice
@@ -103,43 +134,45 @@ export function AudioLogEditor({ audioLogId, onClose }: Props) {
           onChange={handleStatus}
         />
 
-        <div className={styles.field}>
-          <span className={styles.label}>{t('audiolog.paragraphs')}</span>
-          {log.paragraphs.map((p, i) => (
-            <div key={i} className={styles.paragraph}>
-              <textarea
-                className={styles.paragraphText}
-                value={p.text}
-                onChange={(e) => handleParagraphText(i, e.target.value)}
-              />
-              <div className={styles.paragraphFooter}>
-                <span className={styles.sources}>
-                  {t('audiolog.sourceCount', { count: p.sourceEntryIds.length })}
-                </span>
-                {p.cue && <span className={styles.sources}>[{p.cue}]</span>}
+        <div className={styles.blocks}>
+          {view.paragraphs.map((p, i) => (
+            <section key={i} className={styles.block}>
+              <div className={styles.blockMeta}>
+                <span className={styles.number}>{String(i + 1).padStart(2, '0')}</span>
+                <span>{t('audiolog.sourceCount', { count: p.sourceEntryIds.length })}</span>
               </div>
-            </div>
+              <AutoText
+                className={styles.paragraph}
+                value={p.text}
+                onChange={(value) => edit({ paragraph: { index: i, text: value } })}
+              />
+              {p.cue && <p className={styles.cue}>{p.cue}</p>}
+            </section>
           ))}
         </div>
 
-        <div className={styles.field}>
-          <label className={styles.label} htmlFor="patreon-intro">
-            {t('audiolog.patreonIntro')}
-          </label>
-          <textarea
-            id="patreon-intro"
-            className={styles.textarea}
-            value={log.patreonIntro}
-            onChange={(e) => handlePatreonIntro(e.target.value)}
+        <section className={styles.block}>
+          <div className={styles.blockMeta}>
+            <span className={styles.number}>{t('audiolog.patreonIntro')}</span>
+          </div>
+          <AutoText
+            className={styles.intro}
+            value={view.patreonIntro}
+            onChange={(value) => edit({ patreonIntro: value })}
           />
-        </div>
+        </section>
 
         <div className={styles.exportRow}>
+          <button
+            type="button"
+            className={styles.docsButton}
+            disabled={docs.state === 'working'}
+            onClick={() => void saveAudioLogToDocs(audioLogId, lang, t('audiolog.patreonIntro'))}
+          >
+            {docs.state === 'working' ? t('docs.working') : t('audiolog.exportDocs')}
+          </button>
           <button type="button" className={styles.exportButton} onClick={handleExportMd}>
             {t('audiolog.exportMd')}
-          </button>
-          <button type="button" className={styles.exportButton} onClick={handleExportTxt}>
-            {t('audiolog.exportTxt')}
           </button>
           <button type="button" className={styles.exportButton} onClick={handleExportPatreon}>
             {t('audiolog.exportPatreon')}

@@ -148,7 +148,12 @@
     "empty": "The map starts to appear once the first entry is processed.",
     "caption": "{{entries}} entries · {{links}} links",
     "accept": "Accept",
-    "reject": "Reject"
+    "reject": "Reject",
+    "fresh": "NEW",
+    "captionSequences": "{{sequences}} sequences · {{entries}} entries",
+    "drawing": "Drawing the map",
+    "fit": "Fit",
+    "redraw": "Redraw"
   },
   "sequence": {
     "generate": "Generate AI draft",
@@ -194,9 +199,10 @@
     "sourceCount_other": "{{count}} sources",
     "patreonIntro": "Patreon intro",
     "exportMd": "Download MD",
-    "exportTxt": "Download TXT",
     "exportPatreon": "Download Patreon text",
-    "readingMode": "Reading mode"
+    "readingMode": "Reading mode",
+    "translating": "Translating",
+    "exportDocs": "Save to Google Docs"
   },
   "category": {
     "theme": "Theme / concept",
@@ -272,5 +278,12 @@
     "audioLogWpm": "Words per minute",
     "audioLogLang": "Audio Log language",
     "audioLogCues": "Production cues"
+  },
+  "docs": {
+    "working": "Saving",
+    "done": "Saved to Google Docs",
+    "copied": "Text copied, paste it into the new document",
+    "error": "Could not save, try again",
+    "open": "Open"
   }
 }

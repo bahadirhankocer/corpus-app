@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import type { AudioLog } from '../../db/types';
 import { useBackHandler } from '../../app/backStack';
 import styles from './ReadingMode.module.css';
 
 interface Props {
-  audioLog: AudioLog;
+  paragraphs: { text: string }[];
   onClose: () => void;
 }
 
 const DEFAULT_SPEED = 18; // px/sec
 
-export function ReadingMode({ audioLog, onClose }: Props) {
+export function ReadingMode({ paragraphs, onClose }: Props) {
   useBackHandler(true, onClose);
   const { t } = useTranslation();
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -74,7 +73,7 @@ export function ReadingMode({ audioLog, onClose }: Props) {
       </div>
       <div className={styles.scroller} ref={scrollerRef} onClick={() => setPlaying((p) => !p)}>
         <div className={styles.text}>
-          {audioLog.paragraphs.map((p, i) => (
+          {paragraphs.map((p, i) => (
             <p key={i} className={styles.paragraph}>
               {p.text}
             </p>

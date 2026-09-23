@@ -1,4 +1,4 @@
-import { refreshCorpus } from './corpusJob';
+import { refreshCorpus, refreshMap } from './corpusJob';
 import { ideatePrompt } from './ideate';
 import { writeListenNotes } from './notes';
 import { kickAiQueue, kickEnrichment } from './queue';
@@ -114,6 +114,7 @@ export function startBackgroundLoops(): () => void {
     void kickAiQueue();
     void kickEnrichment();
     void refreshCorpus();
+    void refreshMap();
     void maybeCreatePrompt();
     void maybeRefillNotes();
   };

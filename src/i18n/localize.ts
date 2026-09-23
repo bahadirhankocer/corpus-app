@@ -1,4 +1,4 @@
-import type { Entry, Lang, LocalText, QuestionText } from '../db/types';
+import type { AudioLog, Entry, Lang, LocalText, QuestionText } from '../db/types';
 
 export function asLang(language: string): Lang {
   return language.startsWith('en') ? 'en' : 'tr';
@@ -17,7 +17,12 @@ export function locQuestion(
   return source.i18n?.[lang] ?? { context: source.context, question: source.question, options: source.options };
 }
 
-function fnv(text: string): string {
+/** Uppercase with plain I everywhere, the way every uppercase label in the app is set. */
+export function upper(text: string): string {
+  return text.toUpperCase().replace(/İ/g, 'I').replace(/\u0307/g, '');
+}
+
+export function fnv(text: string): string {
   let h = 2166136261;
   for (let i = 0; i < text.length; i++) h = Math.imul(h ^ text.charCodeAt(i), 16777619);
   return (h >>> 0).toString(36);
@@ -67,4 +72,38 @@ export function entryView(entry: Entry, lang: Lang): EntryView {
 export function entryHeadline(entry: Entry, lang: Lang): string {
   const view = entryView(entry, lang);
   return view.title || view.text || view.summary || '';
+}
+
+/** Changes whenever the original text of an Audio Log changes, so an older translation is redone. */
+export function audioLogSignature(log: AudioLog): string {
+  return fnv([log.title, log.patreonIntro, ...log.paragraphs.map((p) => `${p.text}␟${p.cue ?? ''}`)].join('␞'));
+}
+
+export interface AudioLogView {
+  title: string;
+  paragraphs: { text: string; cue?: string; sourceEntryIds: string[] }[];
+  patreonIntro: string;
+  /** a translation is shown, so edits belong to the translation */
+  translated: boolean;
+  /** the translation into this language is missing or older than the original */
+  needsTranslation: boolean;
+}
+
+/** An Audio Log in the interface language. An outdated translation is still shown while a new one is made. */
+export function audioLogView(log: AudioLog, lang: Lang): AudioLogView {
+  const original = { title: log.title, paragraphs: log.paragraphs, patreonIntro: log.patreonIntro, translated: false };
+  if (log.lang === lang) return { ...original, needsTranslation: false };
+  const translation = log.translations?.[lang];
+  if (!translation) return { ...original, needsTranslation: true };
+  return {
+    title: translation.title,
+    paragraphs: log.paragraphs.map((p, i) => ({
+      text: translation.paragraphs[i]?.text ?? p.text,
+      cue: translation.paragraphs[i]?.cue ?? p.cue,
+      sourceEntryIds: p.sourceEntryIds,
+    })),
+    patreonIntro: translation.patreonIntro,
+    translated: true,
+    needsTranslation: translation.sourceSig !== audioLogSignature(log),
+  };
 }

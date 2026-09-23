@@ -1,10 +1,13 @@
 import { writeCorpus } from './corpus';
 import { writeDossier } from './dossier';
+import { drawMap } from './map';
 import { aiJobDone, aiJobQueued, aiReportError } from './status';
 import { addNotes, latestCorpus, latestDossier, saveCorpus, saveDossier, setMorningNote } from '../db/corpus';
 import { db } from '../db/db';
+import { latestMap, saveMap } from '../db/maps';
 import { ensureSettings } from '../db/settings';
-import type { Entry } from '../db/types';
+import type { Bi, Entry } from '../db/types';
+import { entryHeadline, upper } from '../i18n/localize';
 import { schedulePing } from '../features/push/push';
 
 const DEBOUNCE_MS = 40_000;
@@ -13,6 +16,8 @@ const DOSSIER_EVERY_ENTRIES = 4;
 const DOSSIER_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 const ECHO_MIN_MS = 60 * 60 * 1000;
 const ECHO_MAX_MS = 3 * 60 * 60 * 1000;
+const MAP_NEW_ENTRIES = 3;
+const MAP_MAX_AGE_MS = 6 * 60 * 60 * 1000;
 
 let timer = 0;
 let running = false;
@@ -120,6 +125,7 @@ export async function refreshCorpus(options: { force?: boolean } = {}): Promise<
       await saveDossier({ ...next, entryCount: done.length });
     }
     aiReportError(undefined);
+    void refreshMap();
   } catch (err) {
     // the next change or tick tries again; meanwhile the corpus screen says what went wrong
     aiReportError(describeError(err));
@@ -157,6 +163,75 @@ export async function refreshDossier(): Promise<void> {
     });
     await saveDossier({ ...next, entryCount: done.length });
   } finally {
+    aiJobDone();
+  }
+}
+
+let mapRunning = false;
+let lastMapAttempt = 0;
+
+/**
+ * Redraws the map after a few new entries, or when something changed and the map is hours old.
+ * `force` is the redraw button.
+ */
+export async function refreshMap(options: { force?: boolean } = {}): Promise<boolean> {
+  if (mapRunning) return false;
+  const settings = await ensureSettings();
+  if (!settings.aiEnabled || !settings.geminiApiKey || !navigator.onLine) return false;
+  const done = await db.entries.where('ai.status').equals('done').toArray();
+  if (done.length === 0) return false;
+
+  const sig = sourceSig(done);
+  const previous = await latestMap();
+  if (!options.force) {
+    if (previous?.sourceSig === sig) return false;
+    if (Date.now() - lastMapAttempt < MIN_RETRY_MS) return false;
+    const unmapped = previous ? done.filter((e) => !previous.headlines[e.id]).length : done.length;
+    const age = previous ? Date.now() - new Date(previous.createdAt).getTime() : Infinity;
+    if (previous && unmapped < MAP_NEW_ENTRIES && age < MAP_MAX_AGE_MS) return false;
+  }
+
+  mapRunning = true;
+  lastMapAttempt = Date.now();
+  aiJobQueued();
+  try {
+    const draft = await drawMap({
+      entries: done,
+      projects: await db.projects.toArray(),
+      corpus: await latestCorpus(),
+      previous,
+      styleGuide: settings.styleGuide,
+      apiKey: settings.geminiApiKey,
+      model: settings.model,
+    });
+    if (draft.clusters.length === 0) return false;
+
+    // Anything the model left out joins the cluster of an entry it is linked to, or the last one.
+    const clusterOf = new Map(draft.clusters.flatMap((c, i) => c.entryIds.map((id) => [id, i] as const)));
+    const links = await db.links.toArray();
+    for (const entry of done) {
+      if (!clusterOf.has(entry.id)) {
+        const linked = links
+          .filter((l) => l.state !== 'dismissed' && (l.fromId === entry.id || l.toId === entry.id))
+          .map((l) => clusterOf.get(l.fromId === entry.id ? l.toId : l.fromId))
+          .find((i) => i !== undefined);
+        const index = linked ?? draft.clusters.length - 1;
+        draft.clusters[index].entryIds.push(entry.id);
+        clusterOf.set(entry.id, index);
+      }
+      if (!draft.headlines[entry.id]) {
+        const short = (lang: 'tr' | 'en') => upper(entryHeadline(entry, lang).split(/\s+/).slice(0, 4).join(' '));
+        draft.headlines[entry.id] = { tr: short('tr'), en: short('en') } satisfies Bi;
+      }
+    }
+
+    await saveMap({ ...draft, sourceSig: sig, entryCount: done.length });
+    return true;
+  } catch (err) {
+    aiReportError(describeError(err));
+    return false;
+  } finally {
+    mapRunning = false;
     aiJobDone();
   }
 }

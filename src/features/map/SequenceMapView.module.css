@@ -1,0 +1,175 @@
+.viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  /* the edges fade, so the matrix reads as going on */
+  mask-image: radial-gradient(ellipse 85% 82% at 50% 50%, #000 72%, transparent 100%);
+}
+
+.viewport:active {
+  cursor: grabbing;
+}
+
+.world {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  --k: 0.5;
+}
+
+.svg {
+  display: block;
+  overflow: visible;
+}
+
+.grid path {
+  stroke: var(--color-text-faint);
+  stroke-width: calc(1px / var(--k));
+  opacity: 0.55;
+  fill: none;
+}
+
+.axis {
+  font-family: var(--font-mono);
+  font-size: calc(11px / max(var(--k), 0.5));
+  letter-spacing: 0.2em;
+  fill: var(--color-text-faint);
+}
+
+/* --- ties -------------------------------------------------------------------------------------------- */
+
+.bond,
+.link {
+  fill: none;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 2.2s var(--delay, 0s) cubic-bezier(0.45, 0, 0.2, 1) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.bond {
+  stroke: var(--color-text-muted);
+  stroke-width: calc(1.1px / max(var(--k), 0.35));
+}
+
+.why {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  fill: var(--color-text-faint);
+  opacity: clamp(0, calc((var(--k) - 0.8) * 2), 0.8);
+}
+
+.link {
+  stroke: var(--color-text-faint);
+  stroke-width: calc(0.8px / max(var(--k), 0.35));
+  opacity: 0.7;
+}
+
+.link[data-kind='contradiction'] {
+  stroke: var(--color-warning);
+  opacity: 0.55;
+}
+
+.link[data-same='true'] {
+  opacity: 0.9;
+}
+
+/* --- clusters ---------------------------------------------------------------------------------------- */
+
+.cluster {
+  animation: surface 1.2s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes surface {
+  from {
+    opacity: 0;
+  }
+}
+
+.point {
+  fill: var(--color-bg);
+  stroke: var(--color-text);
+  stroke-width: calc(1.2px / max(var(--k), 0.35));
+}
+
+.cluster[data-pending='true'] .point {
+  stroke: var(--color-text-faint);
+  stroke-dasharray: 2 2;
+}
+
+.head {
+  cursor: zoom-in;
+}
+
+.hit {
+  fill: transparent;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  /* names stay legible when the whole matrix is in view */
+  font-size: calc(22px * max(1, 0.42 / var(--k)));
+  letter-spacing: 0.1em;
+  fill: var(--color-text);
+}
+
+.number {
+  font-family: var(--font-mono);
+  font-size: 0.62em;
+  letter-spacing: 0.18em;
+  fill: var(--color-text-muted);
+}
+
+.headline {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  fill: var(--color-text);
+  cursor: pointer;
+  /* from far away the stacks are texture; they become legible as you come closer */
+  opacity: clamp(0.32, calc((var(--k) - 0.2) * 3), 1);
+  transition: fill 0.2s;
+}
+
+.headline[data-kind='major'] {
+  font-weight: 300;
+  letter-spacing: -0.02em;
+}
+
+.headline[data-kind='mid'] {
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  fill: var(--color-text-muted);
+}
+
+.headline[data-kind='minor'] {
+  font-family: var(--font-mono);
+  letter-spacing: 0.12em;
+  fill: var(--color-text-muted);
+}
+
+.headline[data-fresh='true'] {
+  animation: fresh 3.2s ease-in-out infinite;
+}
+
+@keyframes fresh {
+  50% {
+    fill: var(--color-warning);
+  }
+}
+
+.headline:hover {
+  fill: var(--color-warning);
+}

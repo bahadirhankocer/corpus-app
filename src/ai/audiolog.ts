@@ -2,7 +2,7 @@ import { PERSONA, aliasEntries } from './context';
 import { stripBridges } from './corpus';
 import { callGemini } from './gemini';
 import type { CorpusDoc, Entry, Lang, Link, Project } from '../db/types';
-import { loc } from '../i18n/localize';
+import { loc, upper } from '../i18n/localize';
 
 const SERIES_CONTEXT = `Seri: AUDIO LOG. "AUDIO LOG 00N — BAŞLIK" biçiminde yayınlanır; sen yalnızca BAŞLIK kısmını üretirsin (tek kavram, büyük harf).
 Kayıt bantta yapılır (wow ve flutter dahil). Ses tek bir tonda, tonal ifade azaltılmış, "çıplak" okunur. Görselde bant döner, kayıt boyunca yavaş bir geri zoom olur ve zoom ile oda sesi giderek duyulur hale gelir. Seri, "Repetition" essay'inin evreninde geçer ama tam olarak değil; arşiv estetiği korunur. Her Patreon yayınından önce bölümü özetleyen kısa bir giriş metni gelir.`;
@@ -178,4 +178,77 @@ ${block}`;
   });
 
   return new Map(result.rewrites.map((r) => [r.index, r.text]));
+}
+
+const TRANSLATION_SCHEMA = {
+  type: 'OBJECT',
+  properties: {
+    title: { type: 'STRING' },
+    paragraphs: {
+      type: 'ARRAY',
+      items: {
+        type: 'OBJECT',
+        properties: { text: { type: 'STRING' }, cue: { type: 'STRING', nullable: true } },
+        required: ['text'],
+      },
+    },
+    patreonIntro: { type: 'STRING' },
+  },
+  required: ['title', 'paragraphs', 'patreonIntro'],
+};
+
+export interface AudioLogTranslation {
+  title: string;
+  paragraphs: { text: string; cue?: string }[];
+  patreonIntro: string;
+}
+
+/** The same log in the other language, written to be read aloud in that language. */
+export async function translateAudioLogText(
+  source: AudioLogTranslation & { lang: Lang },
+  target: Lang,
+  styleGuide: string,
+  apiKey: string,
+  model: string,
+): Promise<AudioLogTranslation> {
+  const from = source.lang === 'tr' ? 'Türkçe' : 'İngilizce';
+  const to = target === 'tr' ? 'Türkçe' : 'İngilizce';
+  const block = source.paragraphs
+    .map((p, i) => `[${i}] ${p.text}${p.cue ? `\n    cue: ${p.cue}` : ''}`)
+    .join('\n');
+
+  const instructions = `Aşağıdaki Audio Log metnini ${from} dilinden ${to} diline aktar. Bu bir çeviri değil, aynı kaydın o dilde yeniden yazılmış hali: bantta tek bir tonla, monoton okunacak.
+
+Kurallar:
+- Paragraf sayısı ve sırası aynen korunsun: ${source.paragraphs.length} paragraf, her biri kendi karşılığıyla.
+- Birinci tekil ses, ritim, imgeler ve onun kelimeleri korunsun; hedef dilde doğal okunsun.
+- Tarih ve saatleri okunacak biçimde yaz (${target === 'tr' ? '"iki on dört", "on dokuz Eylül"' : '"two fourteen", "the nineteenth of September"'}).
+- Başlık tek kavram, büyük harf.
+- cue varsa onu da aktar, yoksa boş bırak.
+- Uzun tire (—) kullanma. Karşıtlık kalıpları kullanma. Kendi işleri için "essay" de, "film" deme.
+
+Başlık: ${source.title}
+
+Paragraflar:
+${block}
+
+Patreon girişi: ${source.patreonIntro}`;
+
+  const raw = await callGemini<{ title: string; paragraphs: { text: string; cue?: string | null }[]; patreonIntro: string }>({
+    apiKey,
+    model,
+    systemInstruction: `${PERSONA}\n\nYazım kılavuzu (kesinlikle uy):\n${styleGuide}\n\nÇıktı yalnızca istenen JSON şemasına uygun olmalı.`,
+    parts: [{ text: instructions }],
+    responseSchema: TRANSLATION_SCHEMA,
+    temperature: 0.4,
+  });
+
+  return {
+    title: upper(raw.title),
+    patreonIntro: raw.patreonIntro,
+    paragraphs: source.paragraphs.map((p, i) => ({
+      text: raw.paragraphs[i]?.text || p.text,
+      cue: raw.paragraphs[i]?.cue || undefined,
+    })),
+  };
 }

@@ -172,6 +172,36 @@ export interface AudioLog {
   lintWarnings: string[];
   status: 'draft' | 'final' | 'recorded' | 'published';
   createdAt: string;
+  /** the same log in the other language, made from the original */
+  translations?: Partial<Record<Lang, AudioLogText>>;
+  /** Google Docs file per language, so saving again updates the same document */
+  docs?: Partial<Record<Lang, string>>;
+}
+
+export interface AudioLogText {
+  title: string;
+  paragraphs: { text: string; cue?: string }[];
+  patreonIntro: string;
+  /** signature of the original this was translated from; a changed original makes it stale */
+  sourceSig: string;
+}
+
+/** The map: the corpus as numbered sequences on a matrix, drawn by the model. */
+export interface SequenceMap {
+  id: string;
+  createdAt: string;
+  sourceSig: string;
+  entryCount: number;
+  clusters: {
+    name: Bi;
+    col: number;
+    row: number;
+    entryIds: string[];
+  }[];
+  /** entry id → short uppercase headline */
+  headlines: Record<string, Bi>;
+  /** organic ties between clusters, by index */
+  bonds: { from: number; to: number; why: Bi }[];
 }
 
 export interface CorpusBridge {

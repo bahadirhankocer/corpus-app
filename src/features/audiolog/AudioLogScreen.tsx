@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useAudioLogs } from '../../db/audiologs';
 import { useSettings } from '../../db/settings';
+import { asLang, audioLogView } from '../../i18n/localize';
 import { formatDateTime } from '../../utils/format';
 import { AudioLogEditor } from './AudioLogEditor';
 import styles from './AudioLogScreen.module.css';
@@ -45,7 +46,7 @@ export function AudioLogScreen() {
         {audioLogs?.map((log) => (
           <button key={log.id} type="button" className={styles.item} onClick={() => setOpenId(log.id)}>
             <span className={styles.itemTitle}>
-              AUDIO LOG {String(log.number).padStart(3, '0')} — {log.title}
+              AUDIO LOG {String(log.number).padStart(3, '0')} — {audioLogView(log, asLang(i18n.language)).title}
             </span>
             <span className={styles.itemMeta}>
               {t(`audiolog.status.${log.status}`)} · {formatDateTime(log.createdAt, i18n.language)}

@@ -9,6 +9,7 @@ import { Layer } from './app/Layer';
 import type { LayerId, ScreenId } from './app/screens';
 import { LAYERS } from './app/screens';
 import { SwipeDeck } from './app/SwipeDeck';
+import { DocsNotice } from './components/DocsNotice';
 import { OfflineStrip } from './components/OfflineStrip';
 import { markSurfaced, pickResurfaceCandidate } from './db/entries';
 import { pendingQuestionCount } from './db/questions';
@@ -17,6 +18,7 @@ import type { Entry } from './db/types';
 import { CaptureScreen } from './features/capture/CaptureScreen';
 import { CorpusScreen } from './features/corpus/CorpusScreen';
 import { runDueDigests } from './features/digests/runDigests';
+import { resumeDocsSave } from './features/export/googleDocs';
 import { EntryDetail } from './features/feed/EntryDetail';
 import { FeedScreen } from './features/feed/FeedScreen';
 import { ProjectInterview } from './features/interview/ProjectInterview';
@@ -77,6 +79,7 @@ function App() {
       if (cancelled) return;
       if (setup?.keySaved) setNotice(t('settings.ai.setupDone'));
       stop = startBackgroundLoops();
+      resumeDocsSave(t('audiolog.patreonIntro'));
       void runDueDigests();
       void syncPush();
       const params = new URLSearchParams(window.location.search);
@@ -159,6 +162,7 @@ function App() {
     <>
       <OfflineStrip />
       {notice && <div className="toast">{notice}</div>}
+      <DocsNotice />
       <SwipeDeck
         active={screen}
         onChange={setScreen}

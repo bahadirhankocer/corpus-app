@@ -3,20 +3,12 @@ import { lintAudioLogDraft, lintParagraphText } from '../../audiolog/lint';
 import { allTitles, createAudioLog } from '../../db/audiologs';
 import { latestCorpus } from '../../db/corpus';
 import { db } from '../../db/db';
+import { tidy } from '../../audiolog/tidy';
+import { upper } from '../../i18n/localize';
 import type { AudioLog, Settings } from '../../db/types';
+import { ensureAudioLogTranslation } from './translateAudioLog';
 
 const REWRITE_PASSES = 2;
-
-/** Mechanical fixes that never need a model: dashes and stray bracketed cues. */
-function tidy(text: string): string {
-  return text
-    .replace(/\s*—\s*/g, ', ')
-    .replace(/\s*\[[^\]]*\]\s*/g, ' ')
-    .replace(/ ,/g, ',')
-    .replace(/,\s*([.,])/g, '$1')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
-}
 
 function rangeLabel(start: Date, end: Date, lang: 'tr' | 'en'): string {
   const fmt = (d: Date) => d.toLocaleDateString(lang === 'tr' ? 'tr-TR' : 'en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -81,9 +73,9 @@ export async function generateAudioLog(settings: Settings): Promise<AudioLog | u
 
   const { warnings, errors } = lintAudioLogDraft(draft.paragraphs, lang, targetWords);
 
-  return createAudioLog({
+  const log = await createAudioLog({
     number: settings.audioLog.nextNumber,
-    title: draft.title.toUpperCase(),
+    title: upper(draft.title),
     weekStart: first,
     rangeEnd: to.toISOString(),
     lang,
@@ -92,4 +84,7 @@ export async function generateAudioLog(settings: Settings): Promise<AudioLog | u
     patreonIntro: tidy(draft.patreonIntro),
     lintWarnings: [...errors, ...warnings],
   });
+  // The other language is ready before he switches to it.
+  void ensureAudioLogTranslation(log.id, lang === 'tr' ? 'en' : 'tr');
+  return log;
 }

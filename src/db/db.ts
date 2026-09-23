@@ -13,6 +13,7 @@ import type {
   Project,
   Prompt,
   Sequence,
+  SequenceMap,
   Settings,
   Sketch,
 } from './types';
@@ -32,6 +33,7 @@ export class CorpusDb extends Dexie {
   dossiers!: EntityTable<Dossier, 'id'>;
   sketches!: EntityTable<Sketch, 'key'>;
   notes!: EntityTable<Note, 'id'>;
+  maps!: EntityTable<SequenceMap, 'id'>;
 
   constructor() {
     super('corpus');
@@ -50,6 +52,9 @@ export class CorpusDb extends Dexie {
       dossiers: 'id, createdAt',
       sketches: 'key',
       notes: 'id, kind, createdAt',
+    });
+    this.version(2).stores({
+      maps: 'id, createdAt',
     });
   }
 }

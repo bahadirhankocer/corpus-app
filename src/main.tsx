@@ -19,6 +19,7 @@ import './i18n'
 import App from './App.tsx'
 import { importLegacyDatabases } from './db/legacy'
 import { runDataMigrations } from './db/migrations'
+import { consumeGoogleRedirect } from './features/export/googleDocs'
 
 /** Service workers left by earlier builds at another path would keep serving an old copy of the app. */
 async function removeForeignServiceWorkers(): Promise<void> {
@@ -38,6 +39,7 @@ async function boot(): Promise<void> {
     console.error('startup migration failed', err)
   }
   void removeForeignServiceWorkers()
+  consumeGoogleRedirect()
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>

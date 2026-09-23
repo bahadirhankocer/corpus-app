@@ -148,7 +148,12 @@
     "empty": "Harita ilk girdi işlendiğinde belirmeye başlar.",
     "caption": "{{entries}} girdi · {{links}} bağ",
     "accept": "Kabul et",
-    "reject": "Reddet"
+    "reject": "Reddet",
+    "fresh": "YENI",
+    "captionSequences": "{{sequences}} sekans · {{entries}} girdi",
+    "drawing": "Harita çiziliyor",
+    "fit": "Sığdır",
+    "redraw": "Yeniden çiz"
   },
   "sequence": {
     "generate": "AI taslağı oluştur",
@@ -194,9 +199,10 @@
     "sourceCount_other": "{{count}} kaynak",
     "patreonIntro": "Patreon giriş metni",
     "exportMd": "MD indir",
-    "exportTxt": "TXT indir",
     "exportPatreon": "Patreon metnini indir",
-    "readingMode": "Okuma modu"
+    "readingMode": "Okuma modu",
+    "translating": "Çevriliyor",
+    "exportDocs": "Google Docs'a kaydet"
   },
   "category": {
     "theme": "Tema / kavram",
@@ -272,5 +278,12 @@
     "audioLogWpm": "Dakikadaki kelime",
     "audioLogLang": "Audio Log dili",
     "audioLogCues": "Yapım işaretleri"
+  },
+  "docs": {
+    "working": "Kaydediliyor",
+    "done": "Google Docs'a kaydedildi",
+    "copied": "Metin kopyalandı, açılan belgeye yapıştır",
+    "error": "Kaydedilemedi, yeniden dene",
+    "open": "Aç"
   }
 }

@@ -10,7 +10,7 @@ Swipe between three stops:
 
 - **Corpus**: the living text, with bridge terms that explain why ideas were connected, and the production file below it. The ring at the bottom opens capture.
 - **Feed**: every entry, with the questions the AI asked about it and your answers.
-- **Map**: the whole corpus as a constellation.
+- **Map**: a sequence map drawn by the model. Entries gather in numbered clusters on a zoomable matrix, tied together by organic lines.
 
 Sequence, Connections, Digests, Audio Log, Settings and Versions open as layers. The back gesture always returns to the previous screen.
 

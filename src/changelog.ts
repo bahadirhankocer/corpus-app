@@ -13,6 +13,18 @@ export interface ChangelogRelease {
 /** Newest first. Add a release here whenever `version` in package.json is bumped. */
 export const CHANGELOG: ChangelogRelease[] = [
   {
+    version: '0.4.0',
+    date: '2026-09-23',
+    title: { tr: 'Sekans haritası', en: 'Sequence map' },
+    items: [
+      { tr: 'Harita artık AI\'ın çizdiği bir sekans haritası: girdiler 01, 02, 03 diye numaralanan kümelerde toplanır, kümeler bir matrisin noktalarına oturur, başlıklar büyük harfle iç içe istiflenir ve aralarında organik bağlar kurulur. Parmaklarla yakınlaşıp uzaklaşılır, bir kümeye dokununca ona yaklaşılır, bir başlığa dokununca girdi açılır.', en: 'The map is now a sequence map drawn by the AI: entries gather in clusters numbered 01, 02, 03, the clusters sit on the points of a matrix, their headlines stack in uppercase and organic ties grow between them. Pinch to zoom, tap a cluster to move closer, tap a headline to open the entry.' },
+      { tr: 'Harita birkaç yeni girdide bir kendini yeniden çizer; aradaki yeni girdiler bir sonraki çizime kadar boş bir noktada bekler.', en: 'The map redraws itself every few entries; new entries wait at a free point until the next drawing.' },
+      { tr: 'Audio Log metni artık kutularda değil: her bölüm Corpus gibi büyük ve düz bir metin, yazdıkça uzar, sürüklemek gerekmez.', en: 'The Audio Log text is no longer in boxes: each part is large plain text like the corpus and grows as you write, with nothing to drag.' },
+      { tr: 'Audio Log iki dilli: bir dilde yazılan log, arayüz dili değişince o dile aktarılmış haliyle açılır. Orijinal değişirse çeviri yenilenir.', en: 'The Audio Log is bilingual: a log written in one language opens in the other when the interface language changes. When the original changes, the translation is redone.' },
+      { tr: 'TXT indirme yerine "Google Docs\'a kaydet": log, Drive\'daki Corpus klasörüne bir Google Doc olarak kaydedilir; tekrar kaydedince aynı belge güncellenir.', en: '"Save to Google Docs" replaces the TXT download: the log is saved as a Google Doc in a Corpus folder on Drive, and saving again updates the same document.' },
+    ],
+  },
+  {
     version: '0.3.1',
     date: '2026-09-22',
     title: { tr: 'Corpus takılmaları', en: 'Corpus stalls' },
